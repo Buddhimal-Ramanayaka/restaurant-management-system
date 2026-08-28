@@ -1,0 +1,33 @@
+# ---- build output ----
+backend/build/
+backend/bin/
+backend/.gradle/
+backend/out/
+frontend/dist/
+frontend/node_modules/
+node_modules/
+
+# ---- IDE / OS ----
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+.claude/
+
+# ---- logs and local runtime ----
+*.log
+_backend.log
+_frontend.log
+
+# ---- local working files (not part of the deliverable) ----
+_docx/
+_diagrams/
+DISSERTATION_EDITS.md
+DISSERTATION_FIXES.md
+VIVA_DEMO_SCRIPT.md
+
+# ---- secrets ----
+.env
+.env.local
+application-local.yml

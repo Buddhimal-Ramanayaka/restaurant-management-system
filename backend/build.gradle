@@ -1,0 +1,72 @@
+plugins {
+    id "java"
+    id "org.springframework.boot" version "3.4.1"
+    id "io.spring.dependency-management" version "1.1.6"
+}
+
+group = "com.rms"
+version = "0.1.0"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Core
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation "org.springframework.boot:spring-boot-starter-websocket"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-aop"
+
+    runtimeOnly "com.mysql:mysql-connector-j"
+
+    implementation "io.jsonwebtoken:jjwt-api:0.12.6"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.6"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.12.6"
+
+    // FR-23 / Appendix B.3 / B.4 - PDF export for bills and purchase orders. Renders a
+    // plain HTML string server-side rather than laying out PDF primitives by hand
+    // (Apache-2.0 licensed, unlike iText's AGPL).
+    implementation "com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10"
+
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.apache.httpcomponents.client5:httpclient5"
+    testImplementation "org.springframework.security:spring-security-test"
+    testImplementation platform("org.testcontainers:testcontainers-bom:1.20.1")
+    testImplementation "org.testcontainers:testcontainers"
+    testImplementation "org.testcontainers:mysql"
+    testImplementation "org.testcontainers:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.named("test") {
+    useJUnitPlatform()
+    // Integration tests need a running Docker daemon (Testcontainers MySQL + real STOMP
+    // connections) - excluded from the default task so `gradlew build`/`test` succeeds
+    // on a plain machine (e.g. an offline viva laptop with no Docker). Run them
+    // explicitly with `gradlew integrationTest` where Docker is available.
+    exclude "**/integration/**"
+}
+
+tasks.register("integrationTest", Test) {
+    useJUnitPlatform()
+    include "**/integration/**"
+    shouldRunAfter test
+}

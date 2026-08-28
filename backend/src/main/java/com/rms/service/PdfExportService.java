@@ -1,0 +1,135 @@
+package com.rms.service;
+
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import com.rms.dto.response.BillResponse;
+import com.rms.dto.response.PurchaseOrderResponse;
+import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+
+/**
+ * FR-23 / Appendix B.3 (bill receipts) / Appendix B.4 (purchase orders "exported as PDF
+ * for emailing to suppliers"). Builds a small HTML string per document and rasterizes it
+ * with openhtmltopdf rather than laying out PDF primitives by hand - the same content
+ * the on-screen receipt/PO views already render, just as a downloadable file instead of
+ * a browser print. Deliberately has no repository/entity dependency of its own: callers
+ * pass in already-resolved DTOs, so this class never has to worry about lazy loading.
+ */
+@Service
+public class PdfExportService {
+
+    public byte[] renderBill(Long orderId, Long tableId, BillResponse bill) {
+        return render(billHtml(orderId, tableId, bill));
+    }
+
+    public byte[] renderPurchaseOrder(PurchaseOrderResponse po) {
+        return render(purchaseOrderHtml(po));
+    }
+
+    private byte[] render(String html) {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.withHtmlContent(html, null);
+            builder.toStream(os);
+            builder.run();
+            return os.toByteArray();
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to generate PDF", ex);
+        }
+    }
+
+    private String billHtml(Long orderId, Long tableId, BillResponse bill) {
+        StringBuilder lines = new StringBuilder();
+        for (var line : bill.lines()) {
+            lines.append("<tr><td>").append(line.quantity()).append("x ").append(escape(line.menuItemName()))
+                    .append("</td><td class=\"right\">").append(money(line.unitPrice())).append("</td>")
+                    .append("<td class=\"right\">").append(money(line.lineTotal())).append("</td></tr>");
+        }
+
+        String discountRow = bill.totalDiscount().compareTo(BigDecimal.ZERO) > 0
+                ? row(escape(bill.appliedPromotionName() != null ? bill.appliedPromotionName() : "Discount"),
+                        "-" + money(bill.totalDiscount()))
+                : "";
+
+        StringBuilder html = new StringBuilder();
+        html.append(HEADER)
+                .append("<h1>Daiya Food Restaurant</h1>")
+                .append("<div class=\"muted\">Order #").append(orderId).append(" - Table ").append(tableId)
+                .append("<br/>").append(LocalDate.now()).append("</div>")
+                .append("<table><thead><tr><th>Item</th><th class=\"right\">Unit</th><th class=\"right\">Total</th></tr></thead><tbody>")
+                .append(lines)
+                .append("</tbody></table>")
+                .append("<table class=\"totals\">")
+                .append(row("Subtotal", money(bill.subtotal())))
+                .append(discountRow)
+                .append(row("Service Charge", money(bill.serviceCharge())))
+                .append(row("VAT", money(bill.vat())))
+                .append("<tr class=\"grand\"><td colspan=\"1\">TOTAL</td><td colspan=\"2\" class=\"right\">")
+                .append(money(bill.total())).append("</td></tr>")
+                .append("</table>")
+                .append("<div class=\"muted\" style=\"margin-top:24px;\">Thank you!</div>")
+                .append(FOOTER);
+        return html.toString();
+    }
+
+    private String purchaseOrderHtml(PurchaseOrderResponse po) {
+        StringBuilder lines = new StringBuilder();
+        BigDecimal grandTotal = BigDecimal.ZERO;
+        for (var item : po.items()) {
+            BigDecimal lineTotal = item.quantityOrdered().multiply(item.estimatedUnitCost() != null ? item.estimatedUnitCost() : BigDecimal.ZERO);
+            grandTotal = grandTotal.add(lineTotal);
+            lines.append("<tr><td>").append(escape(item.ingredientName())).append("</td>")
+                    .append("<td class=\"right\">").append(item.quantityOrdered().stripTrailingZeros().toPlainString()).append("</td>")
+                    .append("<td class=\"right\">").append(item.estimatedUnitCost() != null ? money(item.estimatedUnitCost()) : "-").append("</td>")
+                    .append("<td class=\"right\">").append(money(lineTotal)).append("</td></tr>");
+        }
+
+        StringBuilder html = new StringBuilder();
+        html.append(HEADER)
+                .append("<h1>Purchase Order PO-").append(po.id()).append("</h1>")
+                .append("<div class=\"muted\">Supplier: ").append(escape(po.supplierName())).append("<br/>")
+                .append("Status: ").append(po.status()).append("<br/>")
+                .append("Created: ").append(po.createdAt() != null ? po.createdAt().toLocalDate() : "-")
+                .append(po.autoGenerated() != null && po.autoGenerated() ? " (auto-drafted on reorder alert)" : "")
+                .append("</div>")
+                .append("<table><thead><tr><th>Ingredient</th><th class=\"right\">Qty</th><th class=\"right\">Est. Unit Cost</th><th class=\"right\">Est. Line Total</th></tr></thead><tbody>")
+                .append(lines)
+                .append("</tbody></table>")
+                .append("<table class=\"totals\"><tr class=\"grand\"><td>Estimated Total</td><td class=\"right\">")
+                .append(money(grandTotal)).append("</td></tr></table>")
+                .append(FOOTER);
+        return html.toString();
+    }
+
+    private String row(String label, String value) {
+        return "<tr><td colspan=\"1\">" + label + "</td><td colspan=\"2\" class=\"right\">" + value + "</td></tr>";
+    }
+
+    private String money(BigDecimal value) {
+        return "LKR " + value.setScale(2, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    private String escape(String value) {
+        if (value == null) return "";
+        return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    private static final String HEADER = "<html><head><style>"
+            + "body { font-family: 'Helvetica', sans-serif; font-size: 12px; color: #111; padding: 24px; }"
+            + "h1 { font-size: 18px; margin-bottom: 4px; }"
+            + ".muted { color: #555; font-size: 11px; margin-bottom: 12px; }"
+            + "table { width: 100%; border-collapse: collapse; margin-top: 8px; }"
+            + "th { text-align: left; border-bottom: 1px solid #999; padding: 4px 0; font-size: 10px; text-transform: uppercase; color: #555; }"
+            + "td { padding: 4px 0; }"
+            + ".right { text-align: right; }"
+            + ".totals { margin-top: 4px; }"
+            + ".totals tr:first-child td { border-top: 1px solid #999; padding-top: 8px; }"
+            + ".grand td { font-weight: bold; font-size: 14px; border-top: 1px solid #111; padding-top: 8px; }"
+            + "</style></head><body>";
+
+    private static final String FOOTER = "</body></html>";
+}

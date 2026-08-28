@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: rms-backend
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:rms_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER:rms_user}
+    password: ${DB_PASSWORD:rms_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      # Kept modest on purpose: pessimistic-write locks in RecipeDeductionService hold
+      # row locks for the duration of the transaction, so an oversized pool just
+      # produces more contention rather than more throughput.
+      maximum-pool-size: 15
+      connection-timeout: 5000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate   # schema.sql is authoritative; see resources/schema.sql
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false     # avoid lazy-loading surprises leaking into controllers
+
+  sql:
+    init:
+      mode: never # flip to 'always' locally if you want schema.sql to run automatically
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-to-a-long-random-secret-in-production-min-256-bits}
+    expiration-ms: ${JWT_EXPIRATION_MS:28800000} # 8 hour shift-length default
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  inventory:
+    low-stock-check-enabled: true
+
+logging:
+  level:
+    com.rms: INFO
+    org.hibernate.SQL: WARN

@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Self-hosted fonts (bundled by Vite, no network fetch at runtime) - the viva/code
+ * evaluation environment runs fully offline, so these can no longer be pulled from
+ * fonts.googleapis.com the way index.html originally did. Each file is Google's own
+ * variable-font woff2 for the "latin" subset; a single file backs every weight
+ * declared below via the font's built-in weight axis.
+ */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("./assets/fonts/Inter-variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url("./assets/fonts/SpaceGrotesk-variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("./assets/fonts/JetBrainsMono-variable.woff2") format("woff2");
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-ink-900 text-slate-100;
+  }
+}
+
+@layer components {
+  /* Ticket-perforation signature used on Kitchen Display cards - see components/kitchen/TicketCard.jsx */
+  .ticket-perforation {
+    background-image: radial-gradient(circle, transparent 3px, currentColor 3px);
+    background-size: 10px 3px;
+    background-repeat: repeat-x;
+    background-position: top;
+  }
+}
