@@ -1,0 +1,62 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam ArrowColor #555555
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+  FontSize 12
+}
+title State Machine Diagrams - Order Status (left) and Table Status (right)
+
+state "ORDER STATUS" as OrderSM #E8F5E9 {
+  state PENDING
+  state PREPARING
+  state READY
+  state BILLED
+  state COMPLETED
+  state VOID
+
+  [*] --> PENDING : order submitted
+  PENDING --> PREPARING : kitchen starts cooking
+  PREPARING --> READY : all lines marked done
+  READY --> BILLED : cashier generates bill
+  BILLED --> COMPLETED : payment settled
+  COMPLETED --> [*]
+  PENDING --> VOID : manager-authorised cancellation
+  PREPARING --> VOID : manager-authorised cancellation
+  VOID --> [*]
+}
+
+state "TABLE STATUS" as TableSM #E3F2FD {
+  state AVAILABLE
+  state OCCUPIED
+  state "BILLED " as TBILLED
+  state CLEANING
+  state RESERVED
+
+  [*] --> AVAILABLE
+  AVAILABLE --> OCCUPIED : waiter opens POS session
+  OCCUPIED --> TBILLED : cashier generates bill
+  TBILLED --> CLEANING : payment confirmed
+  CLEANING --> AVAILABLE : marked ready for next guest
+  AVAILABLE --> RESERVED : advance reservation logged
+  RESERVED --> OCCUPIED : reserved party checks in
+  RESERVED --> AVAILABLE : reservation cancelled
+}
+
+note bottom of OrderSM
+  VOID is a terminal side branch, reachable from PENDING or
+  PREPARING only - never once the order has been billed.
+  OrderService.assertLegalTransition enforces this machine.
+end note
+
+note bottom of TableSM
+  RESERVED prevents a walk-in POS session occupying a table
+  before the reserved party arrives. The cart is locked
+  against modification once the table reaches BILLED.
+end note
+
+@enduml

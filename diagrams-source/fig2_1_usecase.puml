@@ -1,0 +1,80 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam ArrowColor #666666
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFF8E1
+  BorderColor #E65100
+  FontSize 12
+}
+skinparam rectangle {
+  BackgroundColor #FCFCFC
+  BorderColor #999999
+}
+title Use Case Diagram - Restaurant Management System
+
+left to right direction
+
+actor Waiter as W
+actor "Kitchen Staff" as K
+actor Cashier as C
+actor Manager as M
+actor Admin as A
+
+rectangle "Restaurant Management System" {
+  usecase "Authenticate\n(role-based access)" as UC0
+  usecase "Manage Tables and\nReservations" as UC1
+  usecase "Compose and Submit\nOrder to Kitchen" as UC2
+  usecase "Void Order" as UC3
+  usecase "Track Order\nPreparation (KOT)" as UC4
+  usecase "Log Ingredient Waste" as UC5
+  usecase "Operate Cashier Shift" as UC6
+  usecase "Bill and Settle Order" as UC7
+  usecase "Apply Manual Discount" as UC8
+  usecase "Monitor Operations\nDashboard" as UC9
+  usecase "Manage Procurement\n(approve PO, record GRN)" as UC10
+  usecase "Reconcile Stock\n(cycle count)" as UC11
+  usecase "Review Shift Reports" as UC12
+  usecase "Manage Users\nand Roles" as UC13
+  usecase "Manage Menu\nand Recipes" as UC14
+  usecase "Manage Suppliers" as UC15
+  usecase "Configure Billing Rates" as UC16
+}
+
+W --> UC1
+W --> UC2
+W --> UC3
+
+K --> UC4
+K --> UC5
+
+C --> UC6
+C --> UC7
+C --> UC8
+
+M --> UC9
+M --> UC10
+M --> UC11
+M --> UC12
+M --> UC1
+M --> UC5
+
+A --> UC13
+A --> UC14
+A --> UC15
+A --> UC16
+
+UC3 ..> UC0 : <<include>>
+UC8 ..> UC0 : <<include>>
+
+note right of UC16
+  Admin inherits every Manager
+  use case in addition to these.
+  Void and Manual Discount each
+  require live manager re-authentication.
+end note
+
+@enduml

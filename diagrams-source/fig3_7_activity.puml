@@ -1,0 +1,88 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam ArrowColor #555555
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+  DiamondBackgroundColor #FFF8E1
+  DiamondBorderColor #E65100
+}
+title Activity Diagram - Complete Order Fulfilment Workflow
+
+|#E3F2FD|Waiter (POS)|
+start
+:Authenticate;
+:View table floor plan;
+if (Table AVAILABLE?) then (no)
+  :Select a different table;
+  detach
+else (yes)
+endif
+:Open POS session on table;
+
+|#E8F5E9|System (Backend)|
+:Lock table row (PESSIMISTIC_WRITE);
+:Set table status = OCCUPIED;
+
+|Waiter (POS)|
+:Browse menu by category;
+:Add items to cart;
+:Enter special instructions;
+:Look up customer (optional CRM);
+:Submit order to kitchen;
+
+|System (Backend)|
+:Lock ingredient rows\n(SELECT ... FOR UPDATE, ascending id);
+:Recipe Deduction Engine\nvalidate stock vs required quantity;
+if (Stock sufficient?) then (no)
+  :Throw InsufficientStockException;
+  :Roll back transaction\n(no order, no stock change);
+
+  |Waiter (POS)|
+  :Receive HTTP 409\nmodify order or inform guest;
+  detach
+else (yes)
+endif
+
+|System (Backend)|
+:Deduct stock and append\ninventory ledger rows;
+:Persist order (status PENDING);
+:Commit transaction;
+:Publish new ticket to /topic/kitchen;
+note right
+  Reorder-threshold event is
+  handled after commit, so a
+  Purchase Order failure cannot
+  roll back the deduction.
+end note
+
+|#FFF8E1|Kitchen Staff|
+:Receive KOT in New lane;
+:Tap Start Cooking (status PREPARING);
+:Mark each line Done;
+:Mark order READY;
+
+|System (Backend)|
+:Notify originating waiter\n(/user/{name}/queue/order-ready);
+
+|Waiter (POS)|
+:Receive Order Ready alert;
+:Serve the guest;
+
+|#FCE4EC|Cashier|
+:Open bill for the table;
+:Apply discount if authorised;
+:Settle payment (cash / card / digital);
+:Record against active shift;
+
+|System (Backend)|
+:Set order COMPLETED;
+:Set table CLEANING;
+
+|Cashier|
+:Release table when ready;
+stop
+@enduml

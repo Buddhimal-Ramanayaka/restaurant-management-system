@@ -1,0 +1,112 @@
+%%{init: {'theme':'base','themeVariables':{'fontSize':'14px','fontFamily':'Segoe UI, Arial, sans-serif'}}}%%
+classDiagram
+    direction TB
+
+    class User {
+        -Long id
+        -String username
+        -Role role
+        -Boolean isActive
+        +getRole() Role
+    }
+    class MenuItem {
+        -Long id
+        -String name
+        -BigDecimal price
+        -Boolean isAvailable
+        -Long version
+        +setIsAvailable(b)
+    }
+    class Ingredient {
+        -Long id
+        -BigDecimal currentStock
+        -BigDecimal reorderLevel
+        -BigDecimal averageUnitCost
+        -Supplier preferredSupplier
+        -Long version
+    }
+    class Recipe {
+        -Long id
+        -MenuItem menuItem
+        -Ingredient ingredient
+        -BigDecimal quantityRequired
+    }
+    class OrderDetail {
+        -Long id
+        -MenuItem menuItem
+        -Integer quantity
+        -OrderStatus lineStatus
+    }
+    class Order {
+        -Long id
+        -OrderStatus status
+        -List~OrderDetail~ items
+        +addItem(detail)
+    }
+    class RestaurantTable {
+        -Long id
+        -String tableNumber
+        -TableStatus operationalStatus
+    }
+
+    class OrderService {
+        -OrderRepository orderRepository
+        -RecipeDeductionService recipeDeductionService
+        -TableService tableService
+        -OrderEventPublisher publisher
+        +submitOrder(req, principal) Order
+        +updateStatus(id, status, lineId) Order
+        +voidOrder(id, user, pass) Order
+    }
+    class RecipeDeductionService {
+        -RecipeRepository recipeRepository
+        -IngredientRepository ingredientRepository
+        -MenuItemRepository menuItemRepository
+        -InventoryLedgerService inventoryLedgerService
+        -OrderEventPublisher publisher
+        -ApplicationEventPublisher eventPublisher
+        +deductForOrder(lines) void
+    }
+    class InventoryAlertService {
+        -PurchaseOrderRepository purchaseOrderRepository
+        -IngredientRepository ingredientRepository
+        -OrderEventPublisher publisher
+        +onReorderThresholdBreached(event) void
+        +handleReorderBreach(id, severity) void
+    }
+    class TableService {
+        -RestaurantTableRepository tableRepository
+        +openTableForOrder(id)
+        +markBilled(id)
+        +releaseTable(id)
+    }
+    class OrderEventPublisher {
+        -SimpMessagingTemplate messagingTemplate
+        +publishNewTicket(order, table)
+        +publishTableStatusChanged(table)
+        +publishStockAlert(alert)
+        +publishMenuItemAvailabilityChanged(item)
+    }
+    class ReorderThresholdBreachedEvent {
+        +Long ingredientId
+        +String severity
+    }
+
+    MenuItem "1" --> "*" Recipe
+    Ingredient "1" --> "*" Recipe
+    Order "1" *-- "*" OrderDetail
+    OrderDetail --> MenuItem
+    Order --> RestaurantTable
+    Order --> User : waiter
+
+    OrderService --> RecipeDeductionService
+    OrderService --> TableService
+    OrderService --> OrderEventPublisher
+    RecipeDeductionService --> Ingredient
+    RecipeDeductionService ..> ReorderThresholdBreachedEvent : publishes
+    ReorderThresholdBreachedEvent ..> InventoryAlertService : consumed AFTER_COMMIT
+    InventoryAlertService --> OrderEventPublisher
+    TableService --> RestaurantTable
+
+    note for RecipeDeductionService "Central engine. Locks ingredient rows with SELECT ... FOR UPDATE in ascending id order. It does NOT depend on InventoryAlertService - it publishes an event instead, so Purchase Order drafting can never roll back a committed stock deduction."
+    note for InventoryAlertService "@Async @TransactionalEventListener(AFTER_COMMIT). Drafts a Purchase Order only once the triggering transaction has committed."

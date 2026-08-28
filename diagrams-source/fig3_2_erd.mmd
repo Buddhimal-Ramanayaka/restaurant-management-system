@@ -1,0 +1,81 @@
+%%{init: {'theme':'base','themeVariables':{'fontSize':'13px','fontFamily':'Segoe UI, Arial, sans-serif','lineColor':'#666'},'flowchart':{'nodeSpacing':28,'rankSpacing':45,'curve':'basis','htmlLabels':true}}}%%
+flowchart TB
+
+subgraph CORE["Core Sales Path"]
+  direction LR
+  MI["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MENU_ITEMS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>name UK<br/>price<br/>category<br/>is_available<br/>version"]
+  RC["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RECIPES&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>menu_item_id FK<br/>ingredient_id FK<br/>quantity_required<br/><i>UQ(menu_item, ingredient)</i>"]
+  IG["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INGREDIENTS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>name UK<br/>current_stock<br/>reorder_level<br/>unit_type<br/>average_unit_cost<br/>preferred_supplier_id FK<br/>version"]
+end
+
+subgraph ORD["Orders and Service"]
+  direction LR
+  OR["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ORDERS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>table_id FK<br/>waiter_id FK<br/>customer_id FK<br/>status<br/>created_at"]
+  OD["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ORDER_DETAILS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>order_id FK CASCADE<br/>menu_item_id FK<br/>quantity<br/>special_notes<br/>line_status"]
+  RT["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RESTAURANT_TABLES&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>table_number UK<br/>seating_capacity<br/>operational_status"]
+  RS["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RESERVATIONS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>table_id FK<br/>customer_name<br/>reservation_time<br/>party_size"]
+end
+
+subgraph PEOPLE["People and CRM"]
+  direction LR
+  US["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;USERS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>username UK<br/>password<br/>role<br/>is_active<br/>full_name"]
+  CU["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CUSTOMERS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>name<br/>phone_number UK<br/>visit_count<br/>lifetime_spend<br/>loyalty_tier"]
+  PR["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROMOTIONS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>name<br/>discount_percent<br/>required_loyalty_tier<br/>enabled"]
+end
+
+subgraph INV["Inventory Audit Trail"]
+  direction LR
+  IL["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INVENTORY_LEDGER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/><i>append-only</i><br/>id PK<br/>ingredient_id FK<br/>quantity_delta signed<br/>resulting_stock<br/>reason<br/>recorded_by_user_id FK"]
+  WL["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WASTE_LOGS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>ingredient_id FK<br/>quantity_wasted<br/>reason_code<br/>logged_by_user_id FK"]
+end
+
+subgraph PROC["Procurement"]
+  direction LR
+  SU["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUPPLIERS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>name<br/>contact_phone<br/>contact_email"]
+  PO["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PURCHASE_ORDERS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>supplier_id FK<br/>status<br/>auto_generated<br/>approved_by FK"]
+  POI["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PURCHASE_ORDER_ITEMS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>purchase_order_id FK<br/>ingredient_id FK<br/>quantity_ordered<br/>estimated_unit_cost"]
+  GRN["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GOODS_RECEIVED_NOTES&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>supplier_id FK<br/>received_date<br/>purchase_order_id FK<br/>recorded_by_user_id FK"]
+  GI["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GRN_ITEMS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>grn_id FK<br/>ingredient_id FK<br/>quantity_received<br/>unit_cost"]
+end
+
+subgraph OPS["Operations and Configuration"]
+  direction LR
+  SH["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SHIFTS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>cashier_id FK<br/>started_at / ended_at<br/>system_cash_total<br/>declared_drawer_amount<br/>variance<br/>reviewed_by_manager_id FK"]
+  AL["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AUDIT_LOGS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>user_id FK<br/>action_type<br/>details<br/>occurred_at"]
+  SS["<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SYSTEM_SETTINGS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><hr/>id PK<br/>setting_key UK<br/>setting_value<br/><i>FR-21 billing rates</i>"]
+end
+
+MI -->|"1:N"| RC
+IG -->|"1:N"| RC
+MI -->|"1:N"| OD
+OR -->|"1:N"| OD
+RT -->|"1:N"| OR
+RT -->|"1:N"| RS
+CU -->|"0:N"| OR
+US -->|"1:N"| OR
+US -->|"1:N"| SH
+US -->|"1:N"| AL
+IG -->|"1:N"| IL
+IG -->|"1:N"| WL
+US -->|"1:N"| IL
+SU -->|"1:N"| IG
+SU -->|"1:N"| PO
+PO -->|"1:N"| POI
+IG -->|"1:N"| POI
+SU -->|"1:N"| GRN
+PO -->|"0:1"| GRN
+GRN -->|"1:N"| GI
+IG -->|"1:N"| GI
+
+classDef core fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px,color:#111
+classDef ord  fill:#FFF3E0,stroke:#E65100,stroke-width:1px,color:#111
+classDef ppl  fill:#E3F2FD,stroke:#1565C0,stroke-width:1px,color:#111
+classDef inv  fill:#FCE4EC,stroke:#AD1457,stroke-width:1px,color:#111
+classDef prc  fill:#F3E5F5,stroke:#6A1B9A,stroke-width:1px,color:#111
+classDef ops  fill:#ECEFF1,stroke:#455A64,stroke-width:1px,color:#111
+class MI,RC,IG core
+class OR,OD,RT,RS ord
+class US,CU,PR ppl
+class IL,WL inv
+class SU,PO,POI,GRN,GI prc
+class SH,AL,SS ops

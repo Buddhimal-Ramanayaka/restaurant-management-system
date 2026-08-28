@@ -1,0 +1,46 @@
+@startsalt
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+title Kitchen Display System - Three-Lane Kanban Board with Real-Time WebSocket Updates
+{
+  {* RMS | Kitchen Display System | [ Log Waste ] | <color:green>* Live</color> | <b>kitchen (KITCHEN) | Log out }
+  ~~ dark theme (bg-ink-900) for low-light kitchen environments ~~
+  {
+    {^"New                    2"
+      {+
+        <b>Order #14   Table 5
+        <color:red><b>! Waiting 17 min - URGENT</color>
+        2x Chicken Kottu
+        1x Watalappan
+        [ <b>Start Cooking ]
+      }
+      ~~ red border past 15 minutes ~~
+      {+
+        <b>Order #15   Table 2
+        Waiting 3 min
+        1x Seafood Rice
+        [ <b>Start Cooking ]
+      }
+    } |
+    {^"Preparing              1"
+      {+
+        <b>Order #13   Table 8
+        Waiting 9 min
+        1x Crab Curry     | [ Mark Done ]
+        2x Garlic Naan    | [ Mark Done ]
+        [ <b>All Ready ]
+      }
+      ~~ All Ready stays disabled until every line is Done ~~
+    } |
+    {^"Ready                  1"
+      {+
+        <b>Order #12   Table 1
+        Waiting 21 min
+        1x Chicken Biryani  | Done
+        <color:green>Waiter notified</color>
+      }
+    }
+  }
+}
+@endsalt

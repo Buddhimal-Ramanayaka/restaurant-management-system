@@ -1,0 +1,40 @@
+%%{init: {'theme':'base','themeVariables':{'fontSize':'15px','fontFamily':'Segoe UI, Arial, sans-serif'},'sequence':{'width':190,'boxMargin':12,'messageFontSize':13,'noteFontSize':13,'actorFontSize':14,'mirrorActors':false,'bottomMarginAdj':10}}}%%
+sequenceDiagram
+    autonumber
+    participant W as Waiter (POS UI)
+    participant C as OrderController
+    participant OS as OrderService
+    participant RD as RecipeDeductionService
+    participant IR as IngredientRepository
+    participant IL as InventoryLedgerService
+    participant EP as OrderEventPublisher
+
+    W->>C: POST /api/orders (tableId, items[])
+    C->>OS: submitOrder(request, waiterPrincipal)
+
+    rect rgb(232, 245, 233)
+    Note over OS,IL: Single @Transactional boundary - steps 3 to 11
+    OS->>OS: tableService.openTableForOrder(tableId)
+    Note right of OS: SELECT ... FOR UPDATE on table row<br/>table.status = OCCUPIED
+    OS->>RD: deductForOrder(List<DeductionLine>)
+    RD->>IR: findAllByIdForUpdate(sorted ingredientIds)
+    Note right of IR: SELECT ... FOR UPDATE, ascending id order<br/>blocks concurrent transactions, avoids deadlock
+    IR-->>RD: List<Ingredient> - all rows locked
+    RD->>RD: validate stock >= required quantity
+    Note right of RD: If short: InsufficientStockException<br/>HTTP 409, whole transaction rolls back
+    RD->>RD: newStock = current - (qty x recipeQty)
+    RD->>IR: save(ingredient)
+    RD->>IL: recordRecipeDeduction(ingredient, delta, newStock)
+    IL-->>RD: append-only ledger row persisted
+    RD->>RD: publish ReorderThresholdBreachedEvent (if below reorder level)
+    RD-->>OS: deduction complete
+    OS->>OS: orderRepository.save(order) - status PENDING
+    end
+
+    Note over OS,EP: Transaction commits here - order and stock are durable
+    OS->>EP: publishNewTicket(order, tableNumber)
+    EP-->>W: STOMP broadcast to /topic/kitchen
+    OS-->>C: OrderResponse (id, status=PENDING, items)
+    C-->>W: 201 Created - order confirmed
+
+    Note over W,EP: Alerting runs after commit: InventoryAlertService consumes the event<br/>asynchronously and drafts a Purchase Order, so a failure there can never<br/>roll back a stock deduction that already succeeded.
