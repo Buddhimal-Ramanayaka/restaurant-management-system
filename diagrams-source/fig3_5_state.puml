@@ -1,62 +1,102 @@
 @startuml
+' Figure 3.5 - State Machine Diagrams, Order Status and Table Status
+'
+' Theme follows the original figure: rounded coloured states with a bold coloured name
+' over a plain description line, filled start node, bullseye terminal node, and labelled
+' transitions. Arranged one machine after the other down the page rather than side by
+' side, so the figure sits portrait.
+'
+' Sizing: once width is the binding constraint the printed point size is set by canvas
+' WIDTH alone, so every state description and transition label is wrapped narrow and the
+' figure is allowed to grow tall in exchange - height is free up to the 9.28in budget.
+'
+' Order transitions verified against OrderService.NEXT / assertLegalTransition / voidOrder;
+' table transitions against TableService.openTableForOrder / markBilled / markCleaning /
+' markAvailable / releaseTable / setReserved.
+
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
-skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 12
-skinparam ArrowColor #555555
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 22
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #37474F
+skinparam nodesep 18
+skinparam ranksep 26
+
 skinparam state {
+  FontSize 23
+  FontStyle bold
+  AttributeFontSize 19
+  AttributeFontStyle plain
+  BorderThickness 1.8
   BackgroundColor #FFFFFF
-  BorderColor #666666
-  FontSize 12
+  BorderColor #607D8B
+  StartColor #212121
+  EndColor #212121
 }
-title State Machine Diagrams - Order Status (left) and Table Status (right)
+skinparam StateFontColor #111111
 
-state "ORDER STATUS" as OrderSM #E8F5E9 {
-  state PENDING
-  state PREPARING
-  state READY
-  state BILLED
-  state COMPLETED
-  state VOID
+title State Machine Diagrams — Order Status and Table Status
 
-  [*] --> PENDING : order submitted
-  PENDING --> PREPARING : kitchen starts cooking
-  PREPARING --> READY : all lines marked done
-  READY --> BILLED : cashier generates bill
-  BILLED --> COMPLETED : payment settled
-  COMPLETED --> [*]
-  PENDING --> VOID : manager-authorised cancellation
-  PREPARING --> VOID : manager-authorised cancellation
-  VOID --> [*]
-}
+state "Order Status State Machine" as OSM {
+  state "PENDING"   as OP #FFF8E1 ##[bold]E65100
+  state "PREPARING" as OR #E3F2FD ##[bold]1976D2
+  state "READY"     as OY #E8F5E9 ##[bold]2E7D32
+  state "BILLED"    as OB #E3F2FD ##[bold]1976D2
+  state "COMPLETED" as OC #B2DFDB ##[bold]00695C
+  state "VOID"      as OV #FFCDD2 ##[bold]C62828
 
-state "TABLE STATUS" as TableSM #E3F2FD {
-  state AVAILABLE
-  state OCCUPIED
-  state "BILLED " as TBILLED
-  state CLEANING
-  state RESERVED
+  OP : order submitted,\nKOT broadcast
+  OR : cook started,\npreparingStartedAt set
+  OY : all lines ready,\nwaiter notified
+  OB : cart locked,\ntable marked BILLED
+  OC : terminal —\ntable sent to CLEANING
+  OV : terminal —\ntable released
 
-  [*] --> AVAILABLE
-  AVAILABLE --> OCCUPIED : waiter opens POS session
-  OCCUPIED --> TBILLED : cashier generates bill
-  TBILLED --> CLEANING : payment confirmed
-  CLEANING --> AVAILABLE : marked ready for next guest
-  AVAILABLE --> RESERVED : advance reservation logged
-  RESERVED --> OCCUPIED : reserved party checks in
-  RESERVED --> AVAILABLE : reservation cancelled
+  [*] --> OP
+  OP --> OR : kitchen taps "Start"
+  OR --> OY : all lines ready
+  OY --> OB : cashier issues bill
+  OB --> OC : payment received
+  OC --> [*]
+
+  OP --> OV : waiter voids
+  OR --> OV : manager voids\n(re-verified)
 }
 
-note bottom of OrderSM
-  VOID is a terminal side branch, reachable from PENDING or
-  PREPARING only - never once the order has been billed.
-  OrderService.assertLegalTransition enforces this machine.
-end note
+state "Table Status State Machine" as TSM {
+  state "AVAILABLE" as TA #C8E6C9 ##[bold]2E7D32
+  state "OCCUPIED"  as TO #FFCDD2 ##[bold]C62828
+  state "BILLED"    as TB #BBDEFB ##[bold]1976D2
+  state "CLEANING"  as TC #FFF9C4 ##[bold]F9A825
+  state "RESERVED"  as TR #E1BEE7 ##[bold]7B1FA2
 
-note bottom of TableSM
-  RESERVED prevents a walk-in POS session occupying a table
-  before the reserved party arrives. The cart is locked
-  against modification once the table reaches BILLED.
-end note
+  TA : floor plan GREEN\nonly state an order\nmay open from
+  TO : floor plan RED\norder in progress
+  TB : floor plan BLUE\npayment pending
+  TC : floor plan YELLOW\nhousekeeping,\ncurrentOrderId cleared
+  TR : advance booking
+
+  [*] --> TA
+  TA --> TO : openTableForOrder\nFOR UPDATE
+  TO --> TB : order reaches BILLED
+  TB --> TC : order reaches COMPLETED
+  TC --> TA : table cleaned, reset
+  TA --> TR : reservation booked
+  TR --> TA : guest seated or\nbooking cancelled
+  TO --> TA : order voided\nreleaseTable
+}
+
+OSM -[hidden]-> TSM
+
+legend bottom
+  PENDING → PREPARING → READY → BILLED → COMPLETED is the
+  only forward path; assertLegalTransition rejects any other
+  target. VOID is a terminal side branch reachable only from
+  PENDING or PREPARING — once the kitchen marks an order
+  READY the dish has been committed and must be billed.
+  A table can only be opened for an order from AVAILABLE,
+  so a RESERVED table returns to AVAILABLE first.
+endlegend
 
 @enduml

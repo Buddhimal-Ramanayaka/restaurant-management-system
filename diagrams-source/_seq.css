@@ -1,0 +1,36 @@
+/* Figure 3.4 - restores the original figure's per-participant colouring.
+   Mermaid gives every actor rect a name="" and every lifeline a data-id="",
+   so each column can be tinted and its lifeline matched to it. */
+
+svg, svg text, .messageText, .noteText, .actor, .labelText, .loopText {
+  font-family: Arial, Helvetica, "Liberation Sans", sans-serif !important;
+}
+.messageText { font-weight: 500 !important; }
+.actor       { font-weight: 700 !important; }
+
+/* lifelines: dashed and tinted to their own column, as in the original */
+line.actor-line { stroke-width: 1.2px !important; stroke-dasharray: 5 4 !important; }
+
+rect.actor[name="W"]  { fill: #DBEAFE !important; stroke: #1565C0 !important; stroke-width: 1.6px !important; }
+line.actor-line[data-id="W"]  { stroke: #1565C0 !important; }
+
+rect.actor[name="C"]  { fill: #FFFFFF !important; stroke: #1565C0 !important; stroke-width: 1.6px !important; }
+line.actor-line[data-id="C"]  { stroke: #1565C0 !important; }
+
+rect.actor[name="OS"] { fill: #D1FAE5 !important; stroke: #2E7D32 !important; stroke-width: 1.6px !important; }
+line.actor-line[data-id="OS"] { stroke: #2E7D32 !important; }
+
+rect.actor[name="RD"] { fill: #FEF3C7 !important; stroke: #E65100 !important; stroke-width: 1.6px !important; }
+line.actor-line[data-id="RD"] { stroke: #E65100 !important; }
+
+rect.actor[name="IR"] { fill: #FEE2E2 !important; stroke: #C62828 !important; stroke-width: 1.6px !important; }
+line.actor-line[data-id="IR"] { stroke: #C62828 !important; }
+
+rect.actor[name="IL"] { fill: #EDE9FE !important; stroke: #6A1B9A !important; stroke-width: 1.6px !important; }
+line.actor-line[data-id="IL"] { stroke: #6A1B9A !important; }
+
+rect.actor[name="EP"] { fill: #D1FAE5 !important; stroke: #059669 !important; stroke-width: 1.6px !important; }
+line.actor-line[data-id="EP"] { stroke: #059669 !important; }
+
+rect.actor[name="AL"] { fill: #FFE0B2 !important; stroke: #EF6C00 !important; stroke-width: 1.6px !important; }
+line.actor-line[data-id="AL"] { stroke: #EF6C00 !important; }

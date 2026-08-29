@@ -1,0 +1,178 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="_mockbase.css">
+<style>
+.app{display:grid;grid-template-columns:198px minmax(0,1fr);min-height:100%}
+.side{background:var(--ink-900);border-right:1px solid var(--ink-700);display:flex;flex-direction:column}
+.sidehd{padding:14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--ink-700)}
+.nav{padding:10px 9px;display:flex;flex-direction:column;gap:2px;flex:1}
+.nv{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:13.5px;color:var(--t2);white-space:nowrap}
+.nv.on{background:var(--accent-dim);color:var(--accent-soft);font-weight:700}
+.sidefo{border-top:1px solid var(--ink-700);padding:11px 13px;display:flex;align-items:center;gap:9px}
+.main{padding:15px 17px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.kpi{background:var(--ink-800);border:1px solid var(--ink-700);border-radius:11px;padding:11px 12px;min-width:0}
+.kpil{font-size:12.5px;color:var(--t3);display:flex;align-items:center;justify-content:space-between;gap:6px}
+.kpiv{font-family:"Space Grotesk",sans-serif;font-weight:800;font-size:21px;margin:4px 0 3px;white-space:nowrap}
+.kpis2{font-size:11.5px;color:var(--t3);white-space:nowrap}
+.cols{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.18fr);gap:13px;align-items:start}
+.panel{background:var(--ink-800);border:1px solid var(--ink-700);border-radius:11px;padding:11px 12px;min-width:0}
+.ph{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.alert{border-radius:9px;padding:9px 11px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;min-width:0}
+.alert .txt{min-width:0;flex:1}
+.alert .ttl{white-space:nowrap;font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px}
+.alert .sub{font-size:11.5px;margin-top:3px;line-height:1.4}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th{font-size:11.5px;color:var(--t3);text-align:left;font-weight:600;padding:5px 6px;border-bottom:1px solid var(--ink-700);white-space:nowrap}
+td{font-size:12.5px;padding:5px 6px;border-bottom:1px solid #ffffff0d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.num{text-align:right;font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+.chart{display:flex;align-items:flex-end;gap:11px;height:150px;padding:0 4px;margin-top:4px}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:0;min-width:0}
+.seg{border-radius:3px 3px 0 0}
+.xl{font-size:11px;color:var(--t3);text-align:center;margin-top:5px}
+.lg{display:flex;gap:14px;font-size:11.5px;color:var(--t2);align-items:center}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
+.pill{border-radius:6px;padding:3px 8px;font-size:11.5px;font-weight:700;white-space:nowrap}
+</style>
+<svg style="display:none"><defs>
+<g id="i-dash"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></g>
+<g id="i-box"><path d="m21 8-9-5-9 5v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></g>
+<g id="i-po"><path d="M6 2h9l4 4v16H6z"/><path d="M8 11h8M8 15h6"/></g>
+<g id="i-truck"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></g>
+<g id="i-cal"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></g>
+<g id="i-users"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 8.5a3 3 0 0 1 0 5M18 20a6 6 0 0 0-2-4.4"/></g>
+<g id="i-trash"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></g>
+<g id="i-chart"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></g>
+<g id="i-gear"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></g>
+<g id="i-warn"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></g>
+<g id="i-alert"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16h.01"/></g>
+<g id="i-up"><path d="M12 19V5M5 12l7-7 7 7"/></g>
+<g id="i-money"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/></g>
+<g id="i-list"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></g>
+<g id="i-table"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/></g>
+<g id="i-pdf"><path d="M6 2h9l4 4v16H6z"/><path d="M9 13h2a1.5 1.5 0 0 1 0 3H9zM9 13v6"/></g>
+<g id="i-star"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></g>
+</defs></svg>
+
+<div class="app">
+  <div class="side">
+    <div class="sidehd">
+      <div class="logo">R</div>
+      <div><div class="disp" style="font-size:16px">RMS</div>
+        <div style="font-size:11.5px;color:var(--t3)">Manager Panel</div></div>
+    </div>
+    <div class="nav">
+      <div class="nv on"><svg class="ic" viewBox="0 0 24 24"><use href="#i-dash"/></svg>Dashboard</div>
+      <div class="nv"><svg class="ic" viewBox="0 0 24 24"><use href="#i-box"/></svg>Inventory</div>
+      <div class="nv"><svg class="ic" viewBox="0 0 24 24"><use href="#i-po"/></svg>Purchase Orders</div>
+      <div class="nv"><svg class="ic" viewBox="0 0 24 24"><use href="#i-truck"/></svg>GRN Receipts</div>
+      <div class="nv"><svg class="ic" viewBox="0 0 24 24"><use href="#i-cal"/></svg>Reservations</div>
+      <div class="nv"><svg class="ic" viewBox="0 0 24 24"><use href="#i-users"/></svg>Staff / Shifts</div>
+      <div class="nv"><svg class="ic" viewBox="0 0 24 24"><use href="#i-trash"/></svg>Waste Logs</div>
+      <div class="nv"><svg class="ic" viewBox="0 0 24 24"><use href="#i-chart"/></svg>Analytics</div>
+      <div class="nv"><svg class="ic" viewBox="0 0 24 24"><use href="#i-gear"/></svg>Settings</div>
+    </div>
+    <div class="sidefo">
+      <span style="width:30px;height:30px;border-radius:50%;background:var(--ink-700);display:grid;place-items:center;font-size:11.5px;font-weight:700">DM</span>
+      <span><span style="font-size:12.5px;font-weight:600;display:block">Dilshan (Manager)</span>
+        <span style="font-size:11px;color:var(--t3)">Shift 08:00 &ndash; 16:00</span></span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div>
+      <div class="disp" style="font-size:19px">Today&rsquo;s Overview</div>
+      <div style="font-size:12.5px;color:var(--t3)">Sunday, 13 July 2025 &nbsp;&bull;&nbsp; Last refreshed 13:42:08</div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="kpil">Total Revenue <svg class="ic" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-money"/></svg></div>
+        <div class="kpiv" style="color:var(--accent)">LKR 47,300</div>
+        <div class="kpis2" style="color:var(--ok)">&uarr; +12% vs yesterday</div></div>
+      <div class="kpi"><div class="kpil">Orders Today <svg class="ic" viewBox="0 0 24 24" style="color:var(--billed)"><use href="#i-list"/></svg></div>
+        <div class="kpiv" style="color:var(--billed)">127</div>
+        <div class="kpis2" style="color:var(--ok)">&uarr; +8% vs yesterday</div></div>
+      <div class="kpi"><div class="kpil">COGS Today <svg class="ic" viewBox="0 0 24 24" style="color:var(--resv)"><use href="#i-box"/></svg></div>
+        <div class="kpiv" style="color:var(--resv)">LKR 18,920</div>
+        <div class="kpis2">Gross margin: 60%</div></div>
+      <div class="kpi"><div class="kpil">Active Tables <svg class="ic" viewBox="0 0 24 24" style="color:var(--ok)"><use href="#i-table"/></svg></div>
+        <div class="kpiv" style="color:var(--ok)">8 / 20</div>
+        <div class="kpis2">7 occupied &bull; 1 billed &bull; 12 free</div></div>
+    </div>
+
+    <div class="cols">
+      <div style="display:flex;flex-direction:column;gap:13px;min-width:0">
+        <div class="panel">
+          <div class="ph"><svg class="ic" viewBox="0 0 24 24" style="color:var(--clean)"><use href="#i-warn"/></svg>Stock Alerts</div>
+
+          <div class="alert" style="background:#3f1616;border:1px solid var(--busy)">
+            <svg class="ic" viewBox="0 0 24 24" style="color:#fca5a5;margin-top:2px"><use href="#i-alert"/></svg>
+            <div class="txt">
+              <div class="ttl" style="color:#fecaca">OUT OF STOCK &mdash; Prawn (0 kg)</div>
+              <div class="sub" style="color:#fca5a5">Prawn Masala and Seafood Platter auto-disabled on the POS.<br>Draft PO #208 auto-generated for Colombo Seafood Traders.</div>
+            </div>
+            <span class="pill" style="background:var(--busy);color:#fff;align-self:center">View PO</span>
+          </div>
+
+          <div class="alert" style="background:#3a2a08;border:1px solid var(--clean);margin-bottom:0">
+            <svg class="ic" viewBox="0 0 24 24" style="color:#fcd34d;margin-top:2px"><use href="#i-warn"/></svg>
+            <div class="txt">
+              <div class="ttl" style="color:#fde68a">LOW STOCK &mdash; Chicken (2.5 kg)</div>
+              <div class="sub" style="color:#fcd34d">Reorder level 12 kg breached.<br>Draft PO #209 pending approval.</div>
+            </div>
+            <span class="pill" style="background:var(--clean);color:#3a2a08;align-self:center">Approve PO</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><svg class="ic" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-star"/></svg>Top Selling Items Today</div>
+          <table>
+            <colgroup><col style="width:38%"><col style="width:13%"><col style="width:19%"><col style="width:17%"><col style="width:13%"></colgroup>
+            <tr><th>Item</th><th class="num">Qty</th><th class="num">Revenue</th><th class="num">COGS</th><th class="num">Margin</th></tr>
+            <tr><td>Chicken Biryani</td><td class="num">38</td><td class="num">17,100</td><td class="num" style="color:var(--resv)">6,840</td><td class="num" style="color:var(--ok)">60%</td></tr>
+            <tr><td>Paneer Tikka</td><td class="num">22</td><td class="num">8,360</td><td class="num" style="color:var(--resv)">3,344</td><td class="num" style="color:var(--ok)">60%</td></tr>
+            <tr><td>Garlic Naan</td><td class="num">44</td><td class="num">3,520</td><td class="num" style="color:var(--resv)">1,056</td><td class="num" style="color:var(--ok)">70%</td></tr>
+            <tr><td>Mango Lassi</td><td class="num">31</td><td class="num">4,650</td><td class="num" style="color:var(--resv)">930</td><td class="num" style="color:var(--ok)">80%</td></tr>
+            <tr><td style="border:0">Butter Chicken</td><td class="num" style="border:0">18</td><td class="num" style="border:0">9,360</td><td class="num" style="border:0;color:var(--resv)">3,744</td><td class="num" style="border:0;color:var(--ok)">60%</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:13px;min-width:0">
+        <div class="panel">
+          <div class="ph" style="justify-content:space-between">
+            <span style="display:flex;align-items:center;gap:8px"><svg class="ic" viewBox="0 0 24 24" style="color:var(--billed)"><use href="#i-chart"/></svg>Daily Revenue vs COGS &mdash; Past 7 Days</span>
+          </div>
+          <div class="lg"><span><span class="sw" style="background:var(--accent)"></span>Revenue</span><span><span class="sw" style="background:var(--resv)"></span>COGS</span></div>
+          <div class="chart">
+            <div class="col"><div class="seg" style="height:30px;background:var(--accent)"></div><div style="height:38px;background:var(--resv)"></div></div>
+            <div class="col"><div class="seg" style="height:38px;background:var(--accent)"></div><div style="height:50px;background:var(--resv)"></div></div>
+            <div class="col"><div class="seg" style="height:44px;background:var(--accent)"></div><div style="height:60px;background:var(--resv)"></div></div>
+            <div class="col"><div class="seg" style="height:33px;background:var(--accent)"></div><div style="height:46px;background:var(--resv)"></div></div>
+            <div class="col"><div class="seg" style="height:52px;background:var(--accent)"></div><div style="height:68px;background:var(--resv)"></div></div>
+            <div class="col"><div class="seg" style="height:60px;background:var(--accent)"></div><div style="height:78px;background:var(--resv)"></div></div>
+            <div class="col"><div class="seg" style="height:50px;background:var(--accent)"></div><div style="height:70px;background:var(--resv)"></div></div>
+          </div>
+          <div style="display:flex;gap:11px;padding:0 4px">
+            <div class="xl" style="flex:1">Mon</div><div class="xl" style="flex:1">Tue</div><div class="xl" style="flex:1">Wed</div>
+            <div class="xl" style="flex:1">Thu</div><div class="xl" style="flex:1">Fri</div><div class="xl" style="flex:1">Sat</div>
+            <div class="xl" style="flex:1;color:var(--accent);font-weight:700">Today</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><svg class="ic" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-po"/></svg>Pending Purchase Orders</div>
+          <table>
+            <colgroup><col style="width:12%"><col style="width:29%"><col style="width:27%"><col style="width:14%"><col style="width:18%"></colgroup>
+            <tr><th>PO&nbsp;#</th><th>Supplier</th><th>Ingredient</th><th class="num">Qty</th><th style="text-align:right">Action</th></tr>
+            <tr><td class="num" style="text-align:left">#208</td><td>Colombo Seafood</td><td>Prawn 0&rarr;20</td><td class="num">20 kg</td>
+              <td style="text-align:right"><span class="pill" style="background:var(--ok);color:#04240f">Approve</span></td></tr>
+            <tr><td class="num" style="text-align:left">#209</td><td>Lanka Agro</td><td>Chicken 2.5&rarr;12</td><td class="num">9.5 kg</td>
+              <td style="text-align:right"><span class="pill" style="background:var(--ok);color:#04240f">Approve</span></td></tr>
+            <tr><td class="num" style="text-align:left;border:0">#207</td><td style="border:0;color:var(--t3)">Rice Traders PVT</td><td style="border:0;color:var(--t3)">Basmati 10&rarr;50</td><td class="num" style="border:0;color:var(--t3)">40 kg</td>
+              <td style="text-align:right;border:0"><span class="pill" style="background:var(--ink-700);color:var(--t3)">Ordered</span></td></tr>
+          </table>
+          <div style="margin-top:10px"><span class="pill" style="background:var(--ink-700);color:var(--t2);display:inline-flex;align-items:center;gap:6px;padding:6px 11px"><svg class="ic" viewBox="0 0 24 24"><use href="#i-pdf"/></svg>Export PDF</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

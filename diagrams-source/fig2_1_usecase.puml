@@ -1,80 +1,154 @@
 @startuml
+' Figure 2.1 - Use Case Diagram, Restaurant Management System
+'
+' Theme follows the original figure: stick-figure actors, one colour per actor carried
+' through its use cases and its association lines, a dashed «system» boundary.
+'
+' Layout: two invisible grouping rectangles pin the use cases into two columns and keep
+' each actor's block contiguous. Admin and Waiter sit on the left against the left
+' column; Manager, Kitchen Staff and Cashier on the right against the right column,
+' Manager declared first so it resolves to the top-right corner. Every association
+' therefore stays inside its own half of the canvas and none of them cross.
+'
+' Verified against SecurityConfig.java authorisation rules and the controller surface.
+
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
-skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 13
-skinparam ArrowColor #666666
-skinparam actorStyle awesome
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 26
+skinparam nodesep 8
+skinparam ranksep 58
+skinparam ArrowThickness 1.6
+
+skinparam actor {
+  FontSize 26
+  FontStyle bold
+  BorderColor #37474F
+  BackgroundColor #FFFFFF
+}
 skinparam usecase {
-  BackgroundColor #FFF8E1
-  BorderColor #E65100
-  FontSize 12
+  FontSize 26
+  BorderThickness 1.6
 }
 skinparam rectangle {
-  BackgroundColor #FCFCFC
-  BorderColor #999999
+  FontSize 26
+  FontStyle bold
+  BackgroundColor #FFFFFF
+  BorderColor #1976D2
+  BorderStyle dashed
+  BorderThickness 2
+  FontColor #1565C0
 }
-title Use Case Diagram - Restaurant Management System
+skinparam rectangle<<grp>> {
+  BackgroundColor Transparent
+  BorderColor Transparent
+  FontColor Transparent
+  BorderThickness 0
+}
+
+title Use Case Diagram — Restaurant Management System
 
 left to right direction
 
-actor Waiter as W
-actor "Kitchen Staff" as K
-actor Cashier as C
-actor Manager as M
-actor Admin as A
+actor "Admin" as A
+actor "Waiter" as W
+actor "Cashier" as C
 
-rectangle "Restaurant Management System" {
-  usecase "Authenticate\n(role-based access)" as UC0
-  usecase "Manage Tables and\nReservations" as UC1
-  usecase "Compose and Submit\nOrder to Kitchen" as UC2
-  usecase "Void Order" as UC3
-  usecase "Track Order\nPreparation (KOT)" as UC4
-  usecase "Log Ingredient Waste" as UC5
-  usecase "Operate Cashier Shift" as UC6
-  usecase "Bill and Settle Order" as UC7
-  usecase "Apply Manual Discount" as UC8
-  usecase "Monitor Operations\nDashboard" as UC9
-  usecase "Manage Procurement\n(approve PO, record GRN)" as UC10
-  usecase "Reconcile Stock\n(cycle count)" as UC11
-  usecase "Review Shift Reports" as UC12
-  usecase "Manage Users\nand Roles" as UC13
-  usecase "Manage Menu\nand Recipes" as UC14
-  usecase "Manage Suppliers" as UC15
-  usecase "Configure Billing Rates" as UC16
+rectangle "«system» Restaurant Management System" {
+
+  rectangle " " <<grp>> as G1 {
+    usecase "Authenticate\n(Login)"          as UX  #ECEFF1;line:607D8B
+
+    usecase "Manage Users\n& Roles"          as UA1 #FFCCBC;line:D84315
+    usecase "Manage Suppliers"               as UA4 #FFCCBC;line:D84315
+    usecase "Configure\nBilling Rates"       as UA5 #FFCCBC;line:D84315
+
+    usecase "View Table\nFloor Plan"         as UW1 #BBDEFB;line:1976D2
+    usecase "Open POS Session\non Table"     as UW2 #BBDEFB;line:1976D2
+    usecase "Add / Remove\nOrder Items"      as UW3 #BBDEFB;line:1976D2
+    usecase "Submit Order\nto Kitchen"       as UW4 #BBDEFB;line:1976D2
+    usecase "Register / Lookup\nCustomer"    as UW5 #BBDEFB;line:1976D2
+    usecase "Preview Loyalty\nDiscount"      as UW6 #BBDEFB;line:1976D2
+    usecase "Void Order"                     as UW7 #BBDEFB;line:1976D2
+    usecase "Receive Ready\nNotification"    as UW8 #BBDEFB;line:1976D2
+
+    usecase "Open / Close\nCashier Shift"    as UC1 #FFE0B2;line:EF6C00
+    usecase "View Orders\nAwaiting Billing"  as UC2 #FFE0B2;line:EF6C00
+    usecase "Generate &\nPrint Bill"         as UC3 #FFE0B2;line:EF6C00
+    usecase "Apply Manual\nDiscount"         as UC4 #FFE0B2;line:EF6C00
+    usecase "Settle Payment\n& Close Table"  as UC5 #FFE0B2;line:EF6C00
+  }
+
+  rectangle " " <<grp>> as G2 {
+    usecase "View Operations\nDashboard"     as UM1 #E1BEE7;line:7B1FA2
+    usecase "Approve\nPurchase Orders"       as UM2 #E1BEE7;line:7B1FA2
+    usecase "Record Goods\nReceived (GRN)"   as UM3 #E1BEE7;line:7B1FA2
+    usecase "Approve Stock\nAdjustments"     as UM4 #E1BEE7;line:7B1FA2
+    usecase "Review Shift\nReports"          as UM5 #E1BEE7;line:7B1FA2
+    usecase "Manage Table\nReservations"     as UM6 #E1BEE7;line:7B1FA2
+    usecase "Log Waste /\nSpoilage"          as UM7 #E1BEE7;line:7B1FA2
+    usecase "Configure\nMenu Items"          as UM8 #E1BEE7;line:7B1FA2
+    usecase "Define Recipe\nMappings"        as UM9 #E1BEE7;line:7B1FA2
+
+    usecase "View KOT\nKanban Board"         as UK1 #C8E6C9;line:2E7D32
+    usecase "Move Ticket\nto Preparing"      as UK2 #C8E6C9;line:2E7D32
+    usecase "Mark Individual\nLines Ready"   as UK3 #C8E6C9;line:2E7D32
+    usecase "Mark Order\nComplete / Ready"   as UK4 #C8E6C9;line:2E7D32
+    usecase "Log Waste /\nKitchen Accident"  as UK5 #C8E6C9;line:2E7D32
+
+  }
+
 }
 
-W --> UC1
-W --> UC2
-W --> UC3
+actor "Manager" as M
+actor "Kitchen Staff" as K
 
-K --> UC4
-K --> UC5
+' put G2 one rank to the right of G1 so the two blocks form two columns
+UA1 -[hidden]- UM1
+UC5 -[hidden]- UK5
 
-C --> UC6
-C --> UC7
-C --> UC8
+' Manager first, so it takes the top of the right-hand rank
+UM1 -[#7B1FA2]- M
+UM2 -[#7B1FA2]- M
+UM3 -[#7B1FA2]- M
+UM4 -[#7B1FA2]- M
+UM5 -[#7B1FA2]- M
+UM6 -[#7B1FA2]- M
+UM7 -[#7B1FA2]- M
+UM8 -[#7B1FA2]- M
+UM9 -[#7B1FA2]- M
 
-M --> UC9
-M --> UC10
-M --> UC11
-M --> UC12
-M --> UC1
-M --> UC5
+UK1 -[#2E7D32]- K
+UK2 -[#2E7D32]- K
+UK3 -[#2E7D32]- K
+UK4 -[#2E7D32]- K
+UK5 -[#2E7D32]- K
 
-A --> UC13
-A --> UC14
-A --> UC15
-A --> UC16
+C -[#EF6C00]- UC1
+C -[#EF6C00]- UC2
+C -[#EF6C00]- UC3
+C -[#EF6C00]- UC4
+C -[#EF6C00]- UC5
 
-UC3 ..> UC0 : <<include>>
-UC8 ..> UC0 : <<include>>
+A -[#D84315]- UA1
+A -[#D84315]- UA4
+A -[#D84315]- UA5
 
-note right of UC16
-  Admin inherits every Manager
-  use case in addition to these.
-  Void and Manual Discount each
-  require live manager re-authentication.
-end note
+W -[#1976D2]- UW1
+W -[#1976D2]- UW2
+W -[#1976D2]- UW3
+W -[#1976D2]- UW4
+W -[#1976D2]- UW5
+W -[#1976D2]- UW6
+W -[#1976D2]- UW7
+W -[#1976D2]- UW8
+
+' every role authenticates before any use case - dashed, so it stays recessive
+A .[#9E9E9E,dashed]. UX
+W .[#9E9E9E,dashed]. UX
+C .[#9E9E9E,dashed]. UX
+UX .[#9E9E9E,dashed]. M
+UX .[#9E9E9E,dashed]. K
+
 
 @enduml

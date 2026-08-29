@@ -1,0 +1,152 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="_mockbase.css">
+<style>
+body{background:var(--ink-950)}
+.hdr{background:var(--ink-900);border-bottom:1px solid var(--ink-700);padding:13px 18px;display:flex;align-items:center;gap:13px}
+.lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;padding:15px 18px}
+.lane{background:var(--ink-900);border:1px solid var(--ink-700);border-radius:12px;padding:11px;display:flex;flex-direction:column;gap:11px;min-width:0}
+.lanehd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lanename{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;letter-spacing:.03em;font-family:"Space Grotesk",sans-serif}
+.ticket{border-radius:11px;border:2px solid var(--ink-700);background:var(--ink-800);overflow:hidden}
+.tkhd{padding:9px 11px;display:flex;flex-direction:column;gap:2px}
+.tkno{font-size:14.5px;font-weight:700}
+.tkmeta{font-size:12px}
+.tkbody{padding:9px 11px;display:flex;flex-direction:column;gap:7px}
+.li{background:var(--ink-950);border:1px solid var(--ink-700);border-radius:8px;padding:6px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13.5px;min-width:0}
+.li .nm{display:flex;align-items:center;gap:7px;min-width:0}
+.act{border-radius:8px;padding:8px;text-align:center;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px}
+.perf{height:3px;background-image:radial-gradient(circle,transparent 1.6px,var(--ink-700) 1.7px);background-size:9px 3px;background-repeat:repeat-x}
+.bar{height:5px;border-radius:99px;background:var(--ink-700);overflow:hidden}
+.bar > i{display:block;height:100%;width:25%;background:var(--billed)}
+.foot{background:var(--ink-900);border-top:1px solid var(--ink-700);padding:9px 18px;font-size:12.5px;color:var(--t3);display:flex;gap:14px;align-items:center}
+</style>
+<svg style="display:none"><defs>
+<g id="i-fire"><path d="M12 2s4 4.2 4 8a4 4 0 0 1-8 0c0-1.4.6-2.6 1.3-3.6"/><path d="M12 22a6 6 0 0 0 6-6c0-2-1-3.6-2.2-5A8 8 0 0 1 12 22a8 8 0 0 1-3.8-11C7 12.4 6 14 6 16a6 6 0 0 0 6 6z"/></g>
+<g id="i-pan"><path d="M3 12h13a4 4 0 0 1 0 8H8a5 5 0 0 1-5-5z"/><path d="M16 12V8"/><path d="M20 6l2-2"/></g>
+<g id="i-bell"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></g>
+<g id="i-warn"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></g>
+<g id="i-check"><path d="m5 13 4 4L19 7"/></g>
+<g id="i-play"><path d="M6 4l14 8-14 8z"/></g>
+<g id="i-live"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/></g>
+<g id="i-dish"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/></g>
+<g id="i-push"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M4 17h16v4H4z"/></g>
+</defs></svg>
+
+<div class="hdr">
+  <div class="logo">R</div>
+  <div>
+    <div class="disp" style="font-size:18px">Kitchen Display System</div>
+    <div style="font-size:12.5px;color:var(--t3)">Live KOT &mdash; STOMP WebSocket Active</div>
+  </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:16px">
+    <span style="display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:var(--ok)"><svg class="ic" viewBox="0 0 24 24"><use href="#i-live"/></svg>LIVE</span>
+    <span style="font-size:13px;color:var(--t3)">3 active orders</span>
+    <span style="text-align:right">
+      <span class="disp mono" style="font-size:20px;display:block;line-height:1.1">13:42</span>
+      <span style="font-size:11.5px;color:var(--t3)">2025-07-13</span>
+    </span>
+  </div>
+</div>
+
+<div class="lanes">
+  <!-- NEW -->
+  <div class="lane">
+    <div class="lanehd">
+      <span class="lanename"><svg class="ic" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-bell"/></svg>NEW</span>
+      <span class="badge" style="background:var(--accent);color:#1a0e03">2 tickets</span>
+    </div>
+
+    <div class="ticket" style="border-color:var(--busy)">
+      <div class="tkhd" style="background:#3f1616">
+        <div class="tkno">Order #1039 &mdash; Table T-03</div>
+        <div class="tkmeta" style="color:#fca5a5;display:flex;align-items:center;gap:6px">
+          <svg class="ic" viewBox="0 0 24 24"><use href="#i-warn"/></svg>Waiting 17 min &mdash; URGENT
+        </div>
+      </div>
+      <div class="perf" style="color:var(--ink-700)"></div>
+      <div class="tkbody">
+        <div class="li"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--t3)"><use href="#i-dish"/></svg>2&times; Chicken Biryani</span><span class="badge" style="background:var(--accent-dim);color:var(--accent-soft)">Pending</span></div>
+        <div style="font-size:11.5px;color:var(--t3);margin:-3px 0 0 4px">Note: No spicy, extra rice</div>
+        <div class="li"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--t3)"><use href="#i-dish"/></svg>3&times; Garlic Naan</span><span class="badge" style="background:var(--accent-dim);color:var(--accent-soft)">Pending</span></div>
+        <div class="li"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--t3)"><use href="#i-dish"/></svg>2&times; Mango Lassi</span><span class="badge" style="background:var(--accent-dim);color:var(--accent-soft)">Pending</span></div>
+        <div class="act" style="background:var(--accent);color:#1a0e03"><svg class="ic" viewBox="0 0 24 24"><use href="#i-play"/></svg>Start Cooking</div>
+      </div>
+    </div>
+
+    <div class="ticket">
+      <div class="tkhd" style="background:var(--ink-700)">
+        <div class="tkno">Order #1041 &mdash; Table T-07</div>
+        <div class="tkmeta" style="color:var(--t3)">Waiting 4 min</div>
+      </div>
+      <div class="perf" style="color:var(--ink-700)"></div>
+      <div class="tkbody">
+        <div class="li"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--t3)"><use href="#i-dish"/></svg>1&times; Butter Chicken</span><span class="badge" style="background:var(--accent-dim);color:var(--accent-soft)">Pending</span></div>
+        <div class="li"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--t3)"><use href="#i-dish"/></svg>1&times; Paneer Tikka</span><span class="badge" style="background:var(--accent-dim);color:var(--accent-soft)">Pending</span></div>
+        <div class="act" style="background:var(--billed);color:#fff"><svg class="ic" viewBox="0 0 24 24"><use href="#i-play"/></svg>Start Cooking</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREPARING -->
+  <div class="lane">
+    <div class="lanehd">
+      <span class="lanename"><svg class="ic" viewBox="0 0 24 24" style="color:var(--billed)"><use href="#i-pan"/></svg>PREPARING</span>
+      <span class="badge" style="background:var(--billed);color:#fff">1 ticket</span>
+    </div>
+
+    <div class="ticket" style="border-color:var(--billed)">
+      <div class="tkhd" style="background:#16305c">
+        <div class="tkno">Order #1040 &mdash; Table T-02</div>
+        <div class="tkmeta" style="color:#93c5fd">Cooking for 8 min</div>
+      </div>
+      <div class="perf" style="color:var(--ink-700)"></div>
+      <div class="tkbody">
+        <div class="li" style="border-color:var(--ok);background:#0f2c1b">
+          <span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--ok)"><use href="#i-check"/></svg>1&times; Mutton Curry</span>
+          <span class="badge" style="background:var(--ok);color:#04240f">Ready</span></div>
+        <div style="font-size:11.5px;color:#86efac;margin:-3px 0 0 4px">Done &mdash; plating</div>
+        <div class="li"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--t3)"><use href="#i-dish"/></svg>1&times; Steamed Rice</span><span class="badge" style="background:#16305c;color:#93c5fd">Cooking</span></div>
+        <div class="li"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--t3)"><use href="#i-dish"/></svg>1&times; Dal Tadka</span><span class="badge" style="background:#16305c;color:#93c5fd">Cooking</span></div>
+        <div class="li"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--t3)"><use href="#i-dish"/></svg>2&times; Masala Chai</span><span class="badge" style="background:#16305c;color:#93c5fd">Cooking</span></div>
+        <div class="bar"><i></i></div>
+        <div style="font-size:11.5px;color:var(--t3)">1 / 4 lines complete</div>
+        <div style="display:flex;gap:8px">
+          <div class="act" style="flex:1;background:var(--billed);color:#fff"><svg class="ic" viewBox="0 0 24 24"><use href="#i-check"/></svg>Mark Done</div>
+          <div class="act" style="flex:1;background:var(--ink-700);color:#7b8aa4">All Ready</div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);text-align:center">All Ready stays disabled until every line is done</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- READY -->
+  <div class="lane">
+    <div class="lanehd">
+      <span class="lanename"><svg class="ic" viewBox="0 0 24 24" style="color:var(--ok)"><use href="#i-check"/></svg>READY</span>
+      <span class="badge" style="background:var(--ok);color:#04240f">1 ticket</span>
+    </div>
+
+    <div class="ticket" style="border-color:var(--ok)">
+      <div class="tkhd" style="background:#0f2c1b">
+        <div class="tkno">Order #1038 &mdash; Table T-01</div>
+        <div class="tkmeta" style="color:#86efac;display:flex;align-items:center;gap:6px">
+          <svg class="ic" viewBox="0 0 24 24"><use href="#i-check"/></svg>All done &mdash; awaiting pickup
+        </div>
+      </div>
+      <div class="perf" style="color:var(--ink-700)"></div>
+      <div class="tkbody">
+        <div class="li" style="border-color:var(--ok)"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--ok)"><use href="#i-check"/></svg>2&times; Veg Fried Rice</span></div>
+        <div class="li" style="border-color:var(--ok)"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--ok)"><use href="#i-check"/></svg>1&times; Palak Paneer</span></div>
+        <div class="li" style="border-color:var(--ok)"><span class="nm"><svg class="ic" viewBox="0 0 24 24" style="color:var(--ok)"><use href="#i-check"/></svg>2&times; Mineral Water</span></div>
+        <div class="act" style="background:var(--resv);color:#fff"><svg class="ic" viewBox="0 0 24 24"><use href="#i-push"/></svg>Waiter Kamal notified via push</div>
+        <div class="act" style="background:var(--ok);color:#04240f"><svg class="ic" viewBox="0 0 24 24"><use href="#i-check"/></svg>Confirm Pickup Done</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <span>Connected: Kitchen Terminal #1</span><span>&bull;</span>
+  <span>WebSocket STOMP <span class="mono">/topic/kitchen</span></span><span>&bull;</span>
+  <span>Updates: real-time (no polling)</span>
+  <span style="margin-left:auto;display:flex;align-items:center;gap:6px;color:var(--ok)"><svg class="ic" viewBox="0 0 24 24"><use href="#i-live"/></svg>Live</span>
+</div>

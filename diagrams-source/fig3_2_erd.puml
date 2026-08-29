@@ -1,0 +1,366 @@
+@startuml
+' Figure 3.2 - Enhanced Entity Relationship Diagram, RMS Database
+' Theme follows the original figure: one coloured header bar per entity over a light
+' tinted body, PK / FK / UQ marked inline, ENUM domains spelled out, cascade rule on
+' each relationship. Laid out top-to-bottom so the figure sits portrait on the page.
+'
+' Transcribed from backend/src/main/resources/schema.sql - 20 tables, 23 enforced
+' foreign keys. The three dashed links are deliberate non-FK references (see note).
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 22
+skinparam nodesep 10
+skinparam ranksep 34
+skinparam ArrowThickness 1.5
+skinparam classAttributeFontSize 21
+skinparam classFontSize 23
+skinparam classFontStyle bold
+hide circle
+hide stereotype
+
+skinparam class {
+  BorderThickness 1.6
+  AttributeFontColor #111111
+  FontColor #FFFFFF
+}
+skinparam class<<usr>> {
+  BackgroundColor #E8EAF6
+  HeaderBackgroundColor #283593
+  BorderColor #283593
+}
+skinparam class<<menu>> {
+  BackgroundColor #E8F5E9
+  HeaderBackgroundColor #2E7D32
+  BorderColor #2E7D32
+}
+skinparam class<<ingr>> {
+  BackgroundColor #FFFDE7
+  HeaderBackgroundColor #F9A825
+  BorderColor #F9A825
+}
+skinparam class<<tbl>> {
+  BackgroundColor #E3F2FD
+  HeaderBackgroundColor #1976D2
+  BorderColor #1976D2
+}
+skinparam class<<supp>> {
+  BackgroundColor #EDE7F6
+  HeaderBackgroundColor #4527A0
+  BorderColor #4527A0
+}
+skinparam class<<join>> {
+  BackgroundColor #F3E5F5
+  HeaderBackgroundColor #6A1B9A
+  BorderColor #6A1B9A
+}
+skinparam class<<ord>> {
+  BackgroundColor #FFEBEE
+  HeaderBackgroundColor #C62828
+  BorderColor #C62828
+}
+skinparam class<<det>> {
+  BackgroundColor #FFF3E0
+  HeaderBackgroundColor #EF6C00
+  BorderColor #EF6C00
+}
+skinparam class<<proc>> {
+  BackgroundColor #E0F2F1
+  HeaderBackgroundColor #00695C
+  BorderColor #00695C
+}
+skinparam class<<cfg>> {
+  BackgroundColor #ECEFF1
+  HeaderBackgroundColor #546E7A
+  BorderColor #546E7A
+}
+
+title Enhanced Entity Relationship Diagram — RMS Database
+
+entity "USERS" as USERS <<usr>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  username : VC(50) <b>UQ</b>
+  role : ENUM <b>[1]</b>
+  is_active : BOOL
+}
+
+entity "SUPPLIERS" as SUPP <<supp>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  name : VC(100)
+}
+
+entity "INGREDIENTS" as INGR <<ingr>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  name : VC(100) <b>UQ</b>
+  current_stock : DEC(12,3)
+  reorder_level : DEC(12,3)
+  unit_type : ENUM <b>[2]</b>
+  avg_unit_cost : DEC(12,4)
+  <i>preferred_supplier_id</i> : <b>FK</b>
+  version <i>(optimistic lock)</i>
+}
+
+entity "MENU_ITEMS" as MENU <<menu>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  name : VC(100) <b>UQ</b>
+  price : DEC(10,2)
+  category : VC(50)
+  is_available : BOOL
+}
+
+entity "RECIPES" as RECIPE <<join>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>menu_item_id</i> : <b>FK</b> CASC
+  <i>ingredient_id</i> : <b>FK</b> RSTR
+  quantity_required : DEC(12,3)
+  <b>UQ</b> (menu_item, ingredient)
+}
+
+entity "RESTAURANT_TABLES" as RTAB <<tbl>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  table_number : VC(10) <b>UQ</b>
+  seating_capacity : INT
+  operational_status : ENUM <b>[3]</b>
+  current_order_id <i>(no FK)</i>
+}
+
+entity "CUSTOMERS" as CUST <<det>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  phone_number : VC(15) <b>UQ</b>
+  visit_count : INT
+  lifetime_spend : DEC(12,2)
+  loyalty_tier : VC(20)
+}
+
+entity "ORDERS" as ORD <<ord>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  table_id <i>(no FK)</i>
+  <i>waiter_id</i> : <b>FK</b> RSTR
+  <i>customer_id</i> : <b>FK</b> SETNULL
+  status : ENUM <b>[4]</b>
+}
+
+entity "ORDER_DETAILS" as ODET <<det>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>order_id</i> : <b>FK</b> CASC
+  <i>menu_item_id</i> : <b>FK</b> RSTR
+  quantity : INT
+  line_status : ENUM <b>[4]</b>
+}
+
+entity "RESERVATIONS" as RESV <<tbl>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>table_id</i> : <b>FK</b> CASC
+  reservation_time : DT
+  party_size : INT
+  status : VC(20)
+}
+
+entity "INVENTORY_LEDGER" as LEDG <<ord>> {
+  <b>id</b> : BIG <b>PK</b>
+  <i>(append-only audit trail)</i>
+  --
+  <i>ingredient_id</i> : <b>FK</b> RSTR
+  quantity_delta : DEC signed
+  resulting_stock : DEC(12,3)
+  reason : ENUM <b>[5]</b>
+  <i>recorded_by_user_id</i> : <b>FK</b>
+}
+
+entity "PURCHASE_ORDERS" as PO <<proc>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>supplier_id</i> : <b>FK</b> RSTR
+  status : ENUM <b>[6]</b>
+  auto_generated : BOOL
+  <i>approved_by_user_id</i> : <b>FK</b>
+}
+
+entity "PURCHASE_ORDER_ITEMS" as POI <<proc>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>purchase_order_id</i> : <b>FK</b> CASC
+  <i>ingredient_id</i> : <b>FK</b> RSTR
+  quantity_ordered : DEC(12,3)
+}
+
+entity "GOODS_RECEIVED_NOTES" as GRN <<menu>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>supplier_id</i> : <b>FK</b> RSTR
+  <i>purchase_order_id</i> : <b>FK</b> SETNULL
+  <i>recorded_by_user_id</i> : <b>FK</b>
+  received_date : DATE
+}
+
+entity "GRN_ITEMS" as GRNI <<menu>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>grn_id</i> : <b>FK</b> CASC
+  <i>ingredient_id</i> : <b>FK</b> RSTR
+  quantity_received : DEC(12,3)
+  unit_cost : DEC(12,4)
+}
+
+entity "WASTE_LOGS" as WASTE <<ingr>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>ingredient_id</i> : <b>FK</b> RSTR
+  <i>logged_by_user_id</i> : <b>FK</b> RSTR
+  quantity_wasted : DEC(12,3)
+  reason_code : VC(30)
+}
+
+entity "SHIFTS" as SHIFT <<usr>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  <i>cashier_id</i> : <b>FK</b> RSTR
+  <i>reviewed_by_mgr_id</i> : <b>FK</b>
+  declared_drawer : DEC(12,2)
+  variance : DEC(12,2)
+}
+
+entity "AUDIT_LOGS" as AUDIT <<join>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  user_id <i>(no FK)</i>
+  action_type : VC(100)
+}
+
+entity "PROMOTIONS" as PROMO <<det>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  discount_percent : DEC(5,2)
+  required_loyalty_tier : VC(20)
+  enabled : BOOL
+}
+
+entity "SYSTEM_SETTINGS" as SETT <<cfg>> {
+  <b>id</b> : BIG <b>PK</b>
+  --
+  setting_key : VC(50) <b>UQ</b>
+  setting_value : VC(50)
+}
+
+' Row grid: every entity of a row has a hidden edge into every entity of the next,
+' pinning each rank so the figure reads as 7 rows of at most 3 tables.
+USERS -[hidden]-> CUST
+USERS -[hidden]-> RTAB
+USERS -[hidden]-> INGR
+SUPP -[hidden]-> CUST
+SUPP -[hidden]-> RTAB
+SUPP -[hidden]-> INGR
+MENU -[hidden]-> CUST
+MENU -[hidden]-> RTAB
+MENU -[hidden]-> INGR
+CUST -[hidden]-> ORD
+CUST -[hidden]-> RESV
+CUST -[hidden]-> RECIPE
+RTAB -[hidden]-> ORD
+RTAB -[hidden]-> RESV
+RTAB -[hidden]-> RECIPE
+INGR -[hidden]-> ORD
+INGR -[hidden]-> RESV
+INGR -[hidden]-> RECIPE
+ORD -[hidden]-> ODET
+ORD -[hidden]-> PO
+ORD -[hidden]-> LEDG
+RESV -[hidden]-> ODET
+RESV -[hidden]-> PO
+RESV -[hidden]-> LEDG
+RECIPE -[hidden]-> ODET
+RECIPE -[hidden]-> PO
+RECIPE -[hidden]-> LEDG
+ODET -[hidden]-> POI
+ODET -[hidden]-> GRN
+ODET -[hidden]-> WASTE
+PO -[hidden]-> POI
+PO -[hidden]-> GRN
+PO -[hidden]-> WASTE
+LEDG -[hidden]-> POI
+LEDG -[hidden]-> GRN
+LEDG -[hidden]-> WASTE
+POI -[hidden]-> GRNI
+POI -[hidden]-> SHIFT
+POI -[hidden]-> AUDIT
+GRN -[hidden]-> GRNI
+GRN -[hidden]-> SHIFT
+GRN -[hidden]-> AUDIT
+WASTE -[hidden]-> GRNI
+WASTE -[hidden]-> SHIFT
+WASTE -[hidden]-> AUDIT
+GRNI -[hidden]-> PROMO
+GRNI -[hidden]-> SETT
+SHIFT -[hidden]-> PROMO
+SHIFT -[hidden]-> SETT
+AUDIT -[hidden]-> PROMO
+AUDIT -[hidden]-> SETT
+
+' ---------------- 23 enforced foreign keys ----------------
+SUPP  ||--o{ INGR
+MENU  ||--o{ RECIPE
+INGR  ||--o{ RECIPE
+USERS ||--o{ ORD
+CUST  ||--o{ ORD
+ORD   ||--o{ ODET
+MENU  ||--o{ ODET
+RTAB  ||--o{ RESV
+INGR  ||--o{ LEDG
+USERS ||--o{ LEDG
+SUPP  ||--o{ PO
+USERS ||--o{ PO
+PO    ||--o{ POI
+INGR  ||--o{ POI
+SUPP  ||--o{ GRN
+USERS ||--o{ GRN
+PO    ||--o{ GRN
+GRN   ||--o{ GRNI
+INGR  ||--o{ GRNI
+USERS ||--o{ SHIFT
+USERS ||--o{ SHIFT
+USERS ||--o{ WASTE
+INGR  ||--o{ WASTE
+
+' ---------------- logical references carried in code, not by a constraint ----
+RTAB  ..o{ ORD : "table_id (no FK)"
+USERS ..o{ AUDIT : "user_id (no FK)"
+CUST  ..   PROMO
+ORD   ..   SETT
+
+legend bottom
+  <b>FK rules</b>  CASC = CASCADE   RSTR = RESTRICT   SETNULL = SET NULL
+  <b>Types</b>  BIG = BIGINT   VC = VARCHAR   DEC = DECIMAL   DT = DATETIME   BOOL = BOOLEAN
+  Keys and defining columns only — every column, type and nullability is listed in Appendix A.4, Data Dictionary.
+  <b>ENUM domains</b>
+  <b>[1]</b> users.role — ADMIN, MANAGER, WAITER, KITCHEN, CASHIER
+  <b>[2]</b> ingredients.unit_type — KG, LITER, UNITS
+  <b>[3]</b> restaurant_tables.operational_status — AVAILABLE, OCCUPIED, BILLED, CLEANING, RESERVED
+  <b>[4]</b> orders.status / order_details.line_status — PENDING, PREPARING, READY, BILLED, COMPLETED, VOID
+  <b>[5]</b> inventory_ledger.reason — RECIPE_DEDUCTION, GRN_RECEIPT, MANUAL_ADJUSTMENT, WASTE_SPOILAGE, STOCK_TAKE_CORRECTION
+  <b>[6]</b> purchase_orders.status — DRAFT, PENDING_APPROVAL, APPROVED, ORDERED, RECEIVED, CANCELLED
+endlegend
+
+note bottom of SETT
+  ORDERS.table_id and RESTAURANT_TABLES.current_order_id
+  are intentionally left without FK constraints: an enforced
+  pair would be circular. Referential integrity for both is
+  held in TableService inside the order transaction.
+  PROMOTIONS and SYSTEM_SETTINGS carry no foreign keys. Both join
+  by value: promotions.required_loyalty_tier is matched against
+  customers.loyalty_tier when a discount is priced, and
+  system_settings supplies SERVICE_CHARGE_RATE and VAT_RATE to
+  every order that is billed.
+end note
+
+@enduml

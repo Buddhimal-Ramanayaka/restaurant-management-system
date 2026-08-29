@@ -1,0 +1,97 @@
+<!doctype html><meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1000px;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#111;padding:10px 12px}
+  h1{font-size:30px;text-align:center;margin-bottom:10px;color:#111}
+  .band{border-radius:10px;border:2.5px solid;padding:9px 10px 10px;margin:0}
+  .band > .bt{font-size:26px;font-weight:700;margin-bottom:8px}
+  .grid{display:grid;gap:7px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .box{border:2px solid;border-radius:8px;padding:7px 8px;background:#fff}
+  .box .h{font-size:23px;font-weight:700;text-align:center;line-height:1.2}
+  .box .r{font-size:19px;font-style:italic;text-align:center;margin-top:1px;margin-bottom:4px}
+  .box ul{list-style:none}
+  .box li{font-size:21px;line-height:1.26;text-align:center;color:#1c1c1c}
+  .mono{font-family:"Courier New",monospace;font-size:19px}
+  .arrow{display:flex;align-items:center;justify-content:center;gap:11px;margin:6px 0}
+  .arrow .tri{width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:15px solid #546E7A}
+  .arrow .lb{font-size:22px;color:#37474F;font-weight:600}
+  /* presentation */
+  .pres{border-color:#1976D2;background:#E3F2FD}  .pres .bt{color:#1565C0}
+  .b-pos{border-color:#1976D2}   .b-pos .h,.b-pos .r{color:#1565C0}
+  .b-kot{border-color:#2E7D32}   .b-kot .h,.b-kot .r{color:#2E7D32}
+  .b-cash{border-color:#F9A825}  .b-cash .h,.b-cash .r{color:#EF6C00}
+  .b-mgr{border-color:#7B1FA2}   .b-mgr .h,.b-mgr .r{color:#7B1FA2}
+  .b-adm{border-color:#D84315}   .b-adm .h,.b-adm .r{color:#D84315}
+  /* application */
+  .app{border-color:#2E7D32;background:#E8F5E9}   .app .bt{color:#2E7D32}
+  .app .box{border-color:#558B2F;background:#F1F8E9}
+  .app .box .h{color:#33691E}
+  /* data */
+  .data{border-color:#EF6C00;background:#FFF3E0}  .data .bt{color:#E65100}
+  .data .box{border-color:#EF6C00;background:#FFF8E1}
+  .data .box .h{color:#E65100}
+</style>
+
+<h1>System Architecture — Restaurant Management System</h1>
+
+<div class="band pres">
+  <div class="bt">Presentation Layer — React 19.0 + Tailwind CSS 3.4 + Vite 5.4</div>
+  <div class="grid g3">
+    <div class="box b-pos"><div class="h">POS Terminal</div><div class="r">(Waiter Role)</div>
+      <ul><li>Category tabs</li><li>Item grid + cart</li><li>Table selector</li><li>Customer lookup</li><li>Loyalty preview</li></ul></div>
+    <div class="box b-kot"><div class="h">KOT Kitchen Display</div><div class="r">(Kitchen Role)</div>
+      <ul><li>Kanban board</li><li>New / Prep / Ready</li><li>STOMP listener</li><li>Real-time updates</li><li>Waste logging</li></ul></div>
+    <div class="box b-cash"><div class="h">Cashier &amp; Billing</div><div class="r">(Cashier Role)</div>
+      <ul><li>Bill preview</li><li>Tax / discount calc</li><li>PDF receipt</li><li>Shift open / close</li><li>Payment settle</li></ul></div>
+  </div>
+  <div class="grid g2" style="margin-top:7px">
+    <div class="box b-mgr"><div class="h">Manager Dashboard</div><div class="r">(Manager Role)</div>
+      <ul><li>Inventory alerts&ensp;&bull;&ensp;PO approval&ensp;&bull;&ensp;GRN entry</li><li>Sales analytics&ensp;&bull;&ensp;Shift review&ensp;&bull;&ensp;Reservations</li></ul></div>
+    <div class="box b-adm"><div class="h">Admin Panel</div><div class="r">(Admin Role)</div>
+      <ul><li>User management&ensp;&bull;&ensp;Supplier management</li><li>Menu &amp; recipe config&ensp;&bull;&ensp;Billing rates</li></ul></div>
+  </div>
+</div>
+
+<div class="arrow"><span class="tri"></span><span class="lb">HTTP REST&nbsp;&nbsp;+&nbsp;&nbsp;STOMP WebSocket</span><span class="tri"></span></div>
+
+<div class="band app">
+  <div class="bt">Application Layer — Spring Boot 3.4.1 / Java 21</div>
+  <div class="grid g3">
+    <div class="box"><div class="h">Security</div>
+      <ul><li>JWT filter</li><li>RBAC by role</li><li>BCrypt auth</li><li>CORS config</li><li>WebSocket channel auth</li></ul></div>
+    <div class="box"><div class="h">REST Controllers (16)</div>
+      <ul><li>Auth, Order, Menu, Table</li><li>Ingredient, Billing, Grn</li><li>Analytics, Customer, User</li><li>Promotion, PurchaseOrder</li><li>Reservation, Settings,</li><li>Supplier, WasteLog</li></ul></div>
+    <div class="box"><div class="h">Service Layer (21)</div>
+      <ul><li>RecipeDeductionService</li><li>OrderService (@Transactional)</li><li>TableService (state machine)</li><li>InventoryAlertService @Async</li><li>InventoryLedgerService</li><li>BillingService</li><li>GrnService (WAC)</li><li>PromotionService</li></ul></div>
+  </div>
+  <div class="grid g2" style="margin-top:7px">
+    <div class="box"><div class="h">WebSocket / STOMP Broker</div>
+      <ul class="mono"><li>/topic/kitchen&ensp;&bull;&ensp;/topic/tables</li><li>/topic/menu&ensp;&bull;&ensp;/topic/alerts/stock</li><li>/user/{name}/queue/order-ready</li><li>/user/{name}/queue/kitchen-resync</li></ul></div>
+    <div class="box"><div class="h">Cross-Cutting Concerns</div>
+      <ul><li>@Aspect audit logger&ensp;&bull;&ensp;@Valid</li><li>GlobalExceptionHandler</li><li>DTO mapping layer</li><li>@EnableAsync&ensp;&bull;&ensp;@EnableScheduling</li></ul></div>
+  </div>
+</div>
+
+<div class="arrow"><span class="tri"></span><span class="lb">Spring Data JPA / JDBC&nbsp;&nbsp;(HikariCP pool, max 15)</span><span class="tri"></span></div>
+
+<div class="band data">
+  <div class="bt">Data Layer — MySQL 8.0 (InnoDB) — 20 tables</div>
+  <div class="grid g3">
+    <div class="box"><div class="h">Core</div>
+      <ul class="mono"><li>users</li><li>menu_items</li><li>ingredients</li><li>recipes</li><li>restaurant_tables</li></ul></div>
+    <div class="box"><div class="h">Orders &amp; Customers</div>
+      <ul class="mono"><li>orders</li><li>order_details</li><li>customers</li><li>reservations</li><li>promotions</li></ul></div>
+    <div class="box"><div class="h">Inventory</div>
+      <ul class="mono"><li>inventory_ledger</li><li>waste_logs</li><li>suppliers</li></ul>
+      <div class="h" style="margin-top:7px">Operations</div>
+      <ul class="mono"><li>shifts</li><li>audit_logs</li><li>system_settings</li></ul></div>
+  </div>
+  <div class="grid g2" style="margin-top:7px">
+    <div class="box"><div class="h">Procurement</div>
+      <ul class="mono"><li>purchase_orders</li><li>purchase_order_items</li><li>goods_received_notes</li><li>grn_items</li></ul></div>
+    <div class="box"><div class="h">Concurrency &amp; Integrity</div>
+      <ul><li>PESSIMISTIC_WRITE locks</li><li>SELECT … FOR UPDATE</li><li>@Version optimistic&ensp;&bull;&ensp;InnoDB row locks</li><li>FK CASCADE / RESTRICT&ensp;&bull;&ensp;ddl-auto: validate</li></ul></div>
+  </div>
+</div>

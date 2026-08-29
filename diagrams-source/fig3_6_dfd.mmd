@@ -1,65 +1,83 @@
-%%{init: {'theme':'base','themeVariables':{'fontSize':'13px','fontFamily':'Segoe UI, Arial, sans-serif','lineColor':'#666'},'flowchart':{'nodeSpacing':30,'rankSpacing':45,'curve':'basis'}}}%%
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial, Helvetica, sans-serif','fontSize':'20px','lineColor':'#546E7A','edgeLabelBackground':'#FFFFFF'},'flowchart':{'nodeSpacing':26,'rankSpacing':38,'curve':'basis','padding':8}}}%%
 flowchart TB
 
-subgraph L1["Level 1 - System Decomposition"]
+subgraph L0["Level 0 — Context Diagram&nbsp;&nbsp;&nbsp;"]
+  direction LR
+  W0([Waiter]) -->|"order items, void request"| SYS(("Restaurant<br/>Management<br/>System"))
+  K0([Kitchen Staff]) -->|"line and ticket status"| SYS
+  C0([Cashier]) -->|"payment, shift declaration"| SYS
+  M0([Manager]) -->|"GRN, PO approval, stock count"| SYS
+  A0([Admin]) -->|"users, menu, recipes, rates"| SYS
+  SYS -->|"KOT ticket, ready alert"| K0
+  SYS -->|"bill, receipt PDF"| C0
+  SYS -->|"KPIs, stock alerts, shift reports"| M0
+  SYS -->|"purchase order PDF"| S0([Supplier])
+  S0 -->|"delivery note"| M0
+  SYS -->|"loyalty tier, visit history"| CU0([Customer])
+end
+
+subgraph L1["Level 1 — System Decomposition&nbsp;&nbsp;&nbsp;"]
   direction TB
-  P1["P1<br/>Authentication<br/>and RBAC"]
-  P2["P2<br/>POS / Order<br/>Management"]
-  P3["P3<br/>Recipe Deduction<br/>Engine"]
-  P4["P4<br/>KOT Kitchen<br/>Display"]
-  P5["P5<br/>Table State<br/>Machine"]
-  P6["P6<br/>Billing and<br/>Payment"]
-  P7["P7<br/>Inventory / GRN /<br/>Procurement"]
 
-  D1[("D1  Orders DB")]
-  D2[("D2  Ingredients DB")]
-  D3[("D3  Inventory Ledger")]
+  P1["P1 &nbsp;Authenticate<br/>and Authorise"]
+  P2["P2 &nbsp;POS / Order<br/>Management"]
+  P3["P3 &nbsp;Recipe<br/>Deduction Engine"]
+  P4["P4 &nbsp;KOT Kitchen<br/>Display"]
+  P5["P5 &nbsp;Table State<br/>Machine"]
+  P6["P6 &nbsp;Billing and<br/>Payment"]
+  P7["P7 &nbsp;Inventory, GRN<br/>and Procurement"]
 
-  WA([Waiter]) --> P1
-  KS([Kitchen Staff]) --> P1
-  CA([Cashier]) --> P1
-  MA([Manager]) --> P1
-  P1 -->|JWT| P2
+  D1[("D1 &nbsp;Orders")]
+  D2[("D2 &nbsp;Ingredients<br/>and Menu")]
+  D3[("D3 &nbsp;Inventory Ledger")]
+  D4[("D4 &nbsp;Procurement")]
+  D5[("D5 &nbsp;Operations")]
+
+  P1 -->|"JWT, role claims"| P2
   P1 -->|JWT| P4
   P1 -->|JWT| P6
   P1 -->|JWT| P7
+  P1 --- D5
 
-  P2 -->|order lines| P3
-  P2 --> D1
-  P2 --> P5
-  P3 -->|"signed delta (sole writer)"| D2
-  P3 -->|"append-only row (sole writer)"| D3
-  P3 -->|threshold breach event| P7
-  P2 -->|new ticket| P4
-  P4 -->|status update| D1
-  P4 -->|order ready| P5
-  P6 --> D1
-  P6 --> P5
-  P7 -->|"GRN receipt (sole writer)"| D2
+  P2 -->|"deduction lines"| P3
+  P2 -->|"order and lines"| D1
+  P2 -->|"open table"| P5
+  P2 -->|"new ticket"| P4
+
+  P3 -->|"signed stock delta<br/>(sole writer)"| D2
+  P3 -->|"append-only row<br/>(sole writer)"| D3
+  P3 -->|"reorder threshold event"| P7
+
+  P4 -->|"line status"| D1
+  P4 -->|"order ready"| P5
+  P5 -->|"table status"| D1
+
+  P6 -->|"bill, payment"| D1
+  P6 -->|"shift totals"| D5
+  P6 -->|"reads VAT and<br/>service-charge rates"| D5
+
+  P7 -->|"purchase orders, GRN"| D4
+  P7 -->|"GRN receipt<br/>(sole writer)"| D2
   P7 -->|"GRN ledger row"| D3
-  P7 -->|purchase order| SUP([Supplier])
 end
 
-subgraph L0["Level 0 - Context Diagram"]
-  direction LR
-  W0([Waiter]) -->|order data| SYS(("Restaurant<br/>Management<br/>System"))
-  K0([Kitchen Staff]) -->|preparation status| SYS
-  C0([Cashier]) -->|payment data| SYS
-  M0([Manager]) -->|GRN and PO approval| SYS
-  A0([Admin]) -->|user and menu configuration| SYS
-  SYS -->|KOT display| K0
-  SYS -->|order-ready alert| W0
-  SYS -->|bill confirmation| C0
-  SYS -->|KPIs and stock alerts| M0
-  SYS -->|purchase order PDF| S0([Supplier])
-  S0 -->|delivery note| M0
-end
+L0 ~~~ L1
 
-classDef proc fill:#E8F5E9,stroke:#2E7D32,color:#111
-classDef store fill:#FFF3E0,stroke:#E65100,color:#111
-classDef ext fill:#E3F2FD,stroke:#1565C0,color:#111
-classDef sys fill:#F3E5F5,stroke:#6A1B9A,color:#111
-class P1,P2,P3,P4,P5,P6,P7 proc
-class D1,D2,D3 store
-class W0,K0,C0,M0,A0,S0,WA,KS,CA,MA,SUP ext
+classDef ext  fill:#E3F2FD,stroke:#1565C0,stroke-width:1.6px,color:#0d1b2a
+classDef sys  fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#1b5e20
+classDef proc fill:#E8F5E9,stroke:#2E7D32,stroke-width:1.6px,color:#111
+classDef store fill:#FFF8E1,stroke:#E65100,stroke-width:1.6px,color:#111
+
+class W0,K0,C0,M0,A0,S0,CU0 ext
 class SYS sys
+class P1,P2,P3,P4,P5,P6,P7 proc
+class D1,D2,D3,D4,D5 store
+
+style L0 fill:#FAFAFA,stroke:#90A4AE,stroke-width:1.4px
+style L1 fill:#FAFAFA,stroke:#90A4AE,stroke-width:1.4px
+
+style P1 fill:#E3F2FD,stroke:#1976D2
+style P3 fill:#FFF8E1,stroke:#F9A825
+style P5 fill:#E0F7FA,stroke:#00838F
+style P6 fill:#FFE0B2,stroke:#EF6C00
+style P7 fill:#F3E5F5,stroke:#7B1FA2

@@ -1,0 +1,298 @@
+@startuml
+' Figure 3.3 - Class Diagram, Core Domain and Service Layer
+'
+' Theme follows the original figure: a coloured header bar per class carrying its
+' stereotype, attributes above methods, and the Spring/JPA annotations that matter to
+' the design shown in italics beneath the member they qualify.
+'
+' Laid out portrait, at most three classes to a row, using the same hidden-edge rank
+' grid as Figure 3.2. Association lines carry multiplicity only - no other labels,
+' because every label reserves a routing channel and shrinks the whole figure.
+'
+' Signatures transcribed from backend/src/main/java/com/rms/{domain,service,repository}.
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 22
+skinparam nodesep 10
+skinparam ranksep 40
+skinparam ArrowThickness 1.5
+skinparam classAttributeFontSize 21
+skinparam classFontSize 23
+skinparam classFontStyle bold
+hide circle
+
+skinparam class {
+  BorderThickness 1.6
+  AttributeFontColor #111111
+  FontColor #FFFFFF
+  StereotypeFontColor #FFFFFF
+  StereotypeFontSize 20
+}
+skinparam class<<Entity>> {
+  BackgroundColor #E3F2FD
+  HeaderBackgroundColor #1976D2
+  BorderColor #1976D2
+}
+skinparam class<<Menu>> {
+  BackgroundColor #E8F5E9
+  HeaderBackgroundColor #2E7D32
+  BorderColor #2E7D32
+}
+skinparam class<<Stock>> {
+  BackgroundColor #FFF3E0
+  HeaderBackgroundColor #EF6C00
+  BorderColor #EF6C00
+}
+skinparam class<<Order>> {
+  BackgroundColor #FFEBEE
+  HeaderBackgroundColor #C62828
+  BorderColor #C62828
+}
+skinparam class<<Join>> {
+  BackgroundColor #F3E5F5
+  HeaderBackgroundColor #6A1B9A
+  BorderColor #6A1B9A
+}
+skinparam class<<Service>> {
+  BackgroundColor #E0F2F1
+  HeaderBackgroundColor #00695C
+  BorderColor #00695C
+}
+skinparam class<<Enum>> {
+  BackgroundColor #FCE4EC
+  HeaderBackgroundColor #AD1457
+  BorderColor #AD1457
+}
+
+title Class Diagram — Core Domain and Service Layer
+
+' ===================== domain =====================
+class User <<Entity>> {
+  - id : Long
+  - username : String
+  - role : Role
+  - isActive : Boolean
+  --
+  <i>@Getter / @Setter (Lombok)</i>
+}
+
+class MenuItem <<Menu>> {
+  - id : Long
+  - name : String
+  - price : BigDecimal
+  - category : String
+  - isAvailable : Boolean
+  - recipes : Set<Recipe>
+  - version : Long  <i>@Version</i>
+}
+
+class Ingredient <<Stock>> {
+  - id : Long
+  - name : String
+  - currentStock : BigDecimal
+  - reorderLevel : BigDecimal
+  - unitType : UnitType
+  - averageUnitCost : BigDecimal
+  - preferredSupplier : Supplier
+  - version : Long
+  <i>@Version — optimistic lock</i>
+}
+
+class Recipe <<Join>> {
+  - id : Long
+  - menuItem : MenuItem
+  - ingredient : Ingredient
+  - quantityRequired : BigDecimal
+  <i>@UniqueConstraint(menuItem, ingredient)</i>
+}
+
+class RestaurantTable <<Entity>> {
+  - id : Long
+  - tableNumber : String
+  - seatingCapacity : Integer
+  - operationalStatus : TableStatus
+  - currentOrderId : Long
+  - version : Long
+  <i>@Version — optimistic lock</i>
+}
+
+class Order <<Order>> {
+  - id : Long
+  - tableId : Long
+  - waiter : User
+  - customer : Customer
+  - status : OrderStatus
+  - items : List<OrderDetail>
+  - createdAt / updatedAt / preparingStartedAt
+}
+
+class OrderDetail <<Order>> {
+  - id : Long
+  - order : Order
+  - menuItem : MenuItem
+  - quantity : Integer
+  - specialNotes : String
+  - lineStatus : OrderStatus
+}
+
+' ===================== enums =====================
+enum Role <<Enum>> {
+  ADMIN
+  MANAGER
+  WAITER
+  KITCHEN
+  CASHIER
+}
+
+enum OrderStatus <<Enum>> {
+  PENDING
+  PREPARING
+  READY
+  BILLED
+  COMPLETED
+  VOID
+}
+
+' ===================== services =====================
+class OrderService <<Service>> {
+  - orderRepository
+  - recipeDeductionService
+  - tableService
+  - managerAuthorizationService
+  - publisher : OrderEventPublisher
+  --
+  + submitOrder(req, principal) <i>@Transactional</i>
+  + updateStatus(orderId, status, lineId) : Order
+  + updateStatusByLineId(lineId, status) : Order
+  + voidOrder(orderId, mgrUser, mgrPass) : Order
+  + findActiveForKitchen() : List<Order>
+  + findAwaitingBilling() : List<Order>
+}
+
+class RecipeDeductionService <<Service>> {
+  - recipeRepository
+  - ingredientRepository
+  - inventoryLedgerService
+  - eventPublisher : ApplicationEventPublisher
+  --
+  + deductForOrder(lines)
+  <i>@Transactional(REQUIRED)</i>
+  <i>@Lock(PESSIMISTIC_WRITE), ascending id order</i>
+  <i>throws InsufficientStockException → HTTP 409</i>
+  <i>record DeductionLine(menuItemId, quantity)</i>
+}
+
+class TableService <<Service>> {
+  - tableRepository
+  - publisher : OrderEventPublisher
+  --
+  + findAll() : List<RestaurantTable>
+  + openTableForOrder(id) <i>@Lock(PW)</i>
+  + markBilled(id) / markCleaning(id)
+  + markAvailable(id) / releaseTable(id)
+  + setReserved(id) : RestaurantTable
+}
+
+class InventoryAlertService <<Service>> {
+  - purchaseOrderRepository
+  - ingredientRepository
+  - self : InventoryAlertService
+  <i>@Lazy self-injection — keeps the proxy</i>
+  --
+  + onReorderThresholdBreached(event)
+  <i>@Async @TransactionalEventListener</i>
+  <i>(phase = AFTER_COMMIT)</i>
+  + handleReorderBreach(ingredientId, severity)
+  <i>@Transactional(REQUIRES_NEW)</i>
+}
+
+class OrderEventPublisher <<Menu>> {
+  - messagingTemplate : SimpMessagingTemplate
+  --
+  + publishNewTicket(order, table)
+  + publishLineStatusChanged(...)
+  + publishOrderVoided(...)
+  + notifyWaiterOrderReady(...)
+  + publishTableStatusChanged(...)
+  + publishStockAlert(...)
+  + publishMenuItemAvailabilityChanged(...)
+}
+
+class "Repository Layer" as Repos <<Join>> {
+  IngredientRepository
+  <i>+ findByIdForUpdate(id)  @Lock(PW)</i>
+  <i>+ findAllByIdForUpdate(ids)  @Lock(PW)</i>
+  RestaurantTableRepository
+  <i>+ findByIdForUpdate(id)  @Lock(PW)</i>
+  RecipeRepository · OrderRepository
+  UserRepository · MenuItemRepository
+  <i>18 interfaces extend JpaRepository</i>
+}
+
+' ===================== row grid, at most 3 per row =====================
+User -[hidden]-> Order
+User -[hidden]-> Recipe
+User -[hidden]-> RestaurantTable
+MenuItem -[hidden]-> Order
+MenuItem -[hidden]-> Recipe
+MenuItem -[hidden]-> RestaurantTable
+Ingredient -[hidden]-> Order
+Ingredient -[hidden]-> Recipe
+Ingredient -[hidden]-> RestaurantTable
+Order -[hidden]-> OrderDetail
+Order -[hidden]-> Role
+Order -[hidden]-> OrderService
+Recipe -[hidden]-> OrderDetail
+Recipe -[hidden]-> Role
+Recipe -[hidden]-> OrderService
+RestaurantTable -[hidden]-> OrderDetail
+RestaurantTable -[hidden]-> Role
+RestaurantTable -[hidden]-> OrderService
+OrderDetail -[hidden]-> OrderStatus
+OrderDetail -[hidden]-> RecipeDeductionService
+OrderDetail -[hidden]-> TableService
+Role -[hidden]-> OrderStatus
+Role -[hidden]-> RecipeDeductionService
+Role -[hidden]-> TableService
+OrderService -[hidden]-> OrderStatus
+OrderService -[hidden]-> RecipeDeductionService
+OrderService -[hidden]-> TableService
+OrderStatus -[hidden]-> InventoryAlertService
+OrderStatus -[hidden]-> Repos
+OrderStatus -[hidden]-> OrderEventPublisher
+RecipeDeductionService -[hidden]-> InventoryAlertService
+RecipeDeductionService -[hidden]-> Repos
+RecipeDeductionService -[hidden]-> OrderEventPublisher
+TableService -[hidden]-> InventoryAlertService
+TableService -[hidden]-> Repos
+TableService -[hidden]-> OrderEventPublisher
+
+' ===================== associations =====================
+MenuItem "1" *-- "*" Recipe
+Ingredient "1" o-- "*" Recipe
+Order "1" *-- "*" OrderDetail
+MenuItem "1" o-- "*" OrderDetail
+User "1" o-- "*" Order
+
+User ..> Role
+Order ..> OrderStatus
+OrderDetail ..> OrderStatus
+
+OrderService ..> RecipeDeductionService
+OrderService ..> TableService
+OrderService ..> OrderEventPublisher
+RecipeDeductionService ..> InventoryAlertService
+TableService ..> OrderEventPublisher
+InventoryAlertService ..> OrderEventPublisher
+RecipeDeductionService ..> Repos
+TableService ..> Repos
+
+legend bottom
+  Attributes and the methods that carry the design are shown; Lombok accessors are omitted.
+  <i>RecipeDeductionService</i> raises a ReorderThresholdBreachedEvent rather than calling
+  <i>InventoryAlertService</i> directly, so the alert runs only after the order transaction commits.
+endlegend
+
+@enduml

@@ -1,0 +1,144 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="_mockbase.css">
+<style>
+.hdr{background:var(--ink-900);border-bottom:1px solid var(--ink-700);padding:12px 18px;display:flex;align-items:center;gap:13px}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 366px;background:var(--ink-950)}
+.left,.cart{min-width:0}
+.left{padding:16px 18px}
+.tabs{display:flex;gap:9px;align-items:center;margin-bottom:15px}
+
+.tab{white-space:nowrap}
+.tab{background:var(--ink-800);border:1px solid var(--ink-700);border-radius:999px;padding:7px 15px;font-size:14px;font-weight:600;color:var(--t2);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tab.on{background:var(--accent);border-color:var(--accent);color:#1a0e03}
+.search{margin-left:auto;background:var(--ink-800);border:1px solid var(--ink-700);border-radius:8px;padding:7px 13px;font-size:13.5px;color:var(--t3);display:flex;align-items:center;gap:7px;width:184px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.item{background:var(--ink-800);border:1px solid var(--ink-700);border-radius:12px;padding:11px;display:flex;flex-direction:column;gap:7px}
+.item.sel{border-color:var(--accent);box-shadow:0 0 0 2px #f9731655}
+.item.off{opacity:.45}
+.thumb{height:74px;border-radius:9px;background:linear-gradient(150deg,#2a3448,#1f2839);display:grid;place-items:center;color:#4b5a75}
+.iname{font-size:15px;font-weight:700}
+.icat{font-size:12.5px;color:var(--t3)}
+.iprice{font-size:16px;font-weight:800;color:var(--accent);font-family:"Space Grotesk",sans-serif}
+.addbtn{background:var(--accent);color:#1a0e03;text-align:center;border-radius:8px;padding:7px;font-size:13.5px;font-weight:700}
+.addbtn.dis{background:var(--ink-700);color:#5b6a83}
+.cart{background:var(--ink-900);border-left:1px solid var(--ink-700);padding:15px;display:flex;flex-direction:column;gap:11px}
+.line,.card{min-width:0}
+.line{background:var(--ink-800);border:1px solid var(--ink-700);border-radius:10px;padding:10px 11px}
+.qty{background:var(--ink-950);border:1px solid var(--ink-700);border-radius:7px;padding:2px 10px;font-weight:700;font-size:14px}
+.note{background:var(--ink-950);border:1px dashed var(--ink-700);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--t3);margin-top:7px;display:flex;gap:6px;align-items:center}
+.tot{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
+.foot{background:var(--ink-900);border-top:1px solid var(--ink-700);padding:9px 18px;display:flex;align-items:center;gap:16px;font-size:12.5px;color:var(--t3)}
+</style>
+<svg style="display:none"><defs>
+<g id="i-cart"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.7 12.1a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6"/></g>
+<g id="i-search"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></g>
+<g id="i-grid"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></g>
+<g id="i-chart"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></g>
+<g id="i-phone"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></g>
+<g id="i-plate"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/></g>
+<g id="i-note"><path d="M4 4h13l3 3v13H4z"/><path d="M8 10h8M8 14h5"/></g>
+<g id="i-check"><path d="m5 13 4 4L19 7"/></g>
+<g id="i-live"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/></g>
+</defs></svg>
+
+<div class="chrome">
+  <div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div>
+  <div class="urlbar mono">http://localhost:5173/pos</div>
+</div>
+
+<div class="hdr">
+  <div class="logo">R</div>
+  <div class="disp" style="font-size:19px">RMS</div>
+  <div style="color:var(--t3);font-size:14px">POS Terminal</div>
+  <div style="margin-left:auto;display:flex;align-items:center">
+    <span class="btn" style="background:var(--ink-800);border:1px solid var(--ink-700);color:var(--t2);display:flex;gap:7px;align-items:center"><svg class="ic" viewBox="0 0 24 24"><use href="#i-grid"/></svg>Tables</span>
+    <span class="btn" style="background:var(--ink-800);border:1px solid var(--ink-700);color:var(--t2);display:flex;gap:7px;align-items:center;margin-left:9px"><svg class="ic" viewBox="0 0 24 24"><use href="#i-chart"/></svg>Reports</span>
+    <span style="margin-left:14px;font-size:14px;color:var(--t2)">Kamal (Waiter)</span>
+    <span style="margin-left:9px;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#1a0e03;display:grid;place-items:center;font-weight:800;font-size:13px">KW</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="left">
+    <div class="tabs">
+      <span class="tab on"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plate"/></svg>Main Course</span>
+      <span class="tab">Beverages</span><span class="tab">Desserts</span>
+      <span class="tab">Starters</span><span class="tab">Specials</span>
+      <span class="search"><svg class="ic" viewBox="0 0 24 24"><use href="#i-search"/></svg>Search items…</span>
+    </div>
+    <div class="grid">
+      <div class="item"><div class="thumb"><svg class="ic" viewBox="0 0 24 24" style="width:30px;height:30px"><use href="#i-plate"/></svg></div>
+        <div><div class="iname">Chicken Biryani</div><div class="icat">Main Course</div></div>
+        <div class="row" style="justify-content:space-between"><span class="iprice">LKR 450</span><span class="badge" style="background:#14532d;color:#86efac">Available</span></div>
+        <div class="addbtn">Add to Cart</div></div>
+      <div class="item"><div class="thumb"><svg class="ic" viewBox="0 0 24 24" style="width:30px;height:30px"><use href="#i-plate"/></svg></div>
+        <div><div class="iname">Butter Chicken</div><div class="icat">Main Course</div></div>
+        <div class="row" style="justify-content:space-between"><span class="iprice">LKR 520</span><span class="badge" style="background:#14532d;color:#86efac">Available</span></div>
+        <div class="addbtn">Add to Cart</div></div>
+      <div class="item sel"><div class="thumb"><svg class="ic" viewBox="0 0 24 24" style="width:30px;height:30px"><use href="#i-plate"/></svg></div>
+        <div><div class="iname">Mutton Curry</div><div class="icat">Main Course</div></div>
+        <div class="row" style="justify-content:space-between"><span class="iprice">LKR 600</span><span class="badge" style="background:#78350f;color:#fcd34d">Low Stock</span></div>
+        <div class="addbtn">Add to Cart</div></div>
+      <div class="item off"><div class="thumb"><svg class="ic" viewBox="0 0 24 24" style="width:30px;height:30px"><use href="#i-plate"/></svg></div>
+        <div><div class="iname">Prawn Masala</div><div class="icat">Main Course</div></div>
+        <div class="row" style="justify-content:space-between"><span class="iprice" style="color:var(--t3)">LKR 780</span><span class="badge" style="background:#3f1d1d;color:#fca5a5">Unavailable</span></div>
+        <div class="addbtn dis">Unavailable</div></div>
+      <div class="item"><div class="thumb"><svg class="ic" viewBox="0 0 24 24" style="width:30px;height:30px"><use href="#i-plate"/></svg></div>
+        <div><div class="iname">Paneer Tikka</div><div class="icat">Main Course</div></div>
+        <div class="row" style="justify-content:space-between"><span class="iprice">LKR 380</span><span class="badge" style="background:#14532d;color:#86efac">Available</span></div>
+        <div class="addbtn">Add to Cart</div></div>
+      <div class="item"><div class="thumb"><svg class="ic" viewBox="0 0 24 24" style="width:30px;height:30px"><use href="#i-plate"/></svg></div>
+        <div><div class="iname">Veg Fried Rice</div><div class="icat">Main Course</div></div>
+        <div class="row" style="justify-content:space-between"><span class="iprice">LKR 320</span><span class="badge" style="background:#14532d;color:#86efac">Available</span></div>
+        <div class="addbtn">Add to Cart</div></div>
+    </div>
+  </div>
+
+  <div class="cart">
+    <div class="row" style="justify-content:space-between">
+      <span class="disp row" style="font-size:17px;gap:8px"><svg class="ic" viewBox="0 0 24 24"><use href="#i-cart"/></svg>Order Cart</span>
+      <span class="badge" style="background:var(--accent-dim);color:var(--accent-soft)">Table: T-05</span>
+    </div>
+    <div class="line">
+      <div class="row" style="justify-content:space-between;gap:8px">
+        <div><div style="font-weight:700">Chicken Biryani</div><div style="font-size:12.5px;color:var(--t3)">LKR 450.00 each</div></div>
+        <div class="row" style="gap:7px">&minus;<span class="qty">2</span>+<span class="mono" style="color:var(--accent);font-weight:700;font-size:14px">LKR&nbsp;900</span></div>
+      </div>
+      <div class="note"><svg class="ic" viewBox="0 0 24 24"><use href="#i-note"/></svg>Special note: No spicy, extra rice</div>
+    </div>
+    <div class="line"><div class="row" style="justify-content:space-between;gap:8px">
+      <div><div style="font-weight:700">Garlic Naan</div><div style="font-size:12.5px;color:var(--t3)">LKR 80.00 each</div></div>
+      <div class="row" style="gap:7px">&minus;<span class="qty">3</span>+<span class="mono" style="color:var(--accent);font-weight:700;font-size:14px">LKR&nbsp;240</span></div></div></div>
+    <div class="line"><div class="row" style="justify-content:space-between;gap:8px">
+      <div><div style="font-weight:700">Mango Lassi</div><div style="font-size:12.5px;color:var(--t3)">LKR 150.00 each</div></div>
+      <div class="row" style="gap:7px">&minus;<span class="qty">2</span>+<span class="mono" style="color:var(--accent);font-weight:700;font-size:14px">LKR&nbsp;300</span></div></div></div>
+
+    <div class="card" style="padding:10px 11px">
+      <div class="row" style="gap:7px;font-size:13.5px;color:var(--t2);margin-bottom:7px"><svg class="ic" viewBox="0 0 24 24"><use href="#i-phone"/></svg>Customer Phone Lookup (CRM)</div>
+      <div class="row" style="gap:8px">
+        <span class="mono" style="flex:1;background:var(--ink-950);border:1px solid var(--ink-700);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--t2)">+94 77 123 4567 &mdash; T. Perera (Gold)</span>
+        <span class="badge" style="background:var(--resv);color:#fff;padding:5px 10px">+ Register</span>
+      </div>
+    </div>
+
+    <div class="card" style="padding:11px 13px">
+      <div class="tot"><span style="color:var(--t2)">Subtotal</span><span class="mono">LKR 1,440.00</span></div>
+      <div class="tot"><span style="color:var(--t2)">Service Charge (10%)</span><span class="mono">LKR 144.00</span></div>
+      <div class="tot"><span style="color:var(--t2)">VAT (8%)</span><span class="mono">LKR 115.20</span></div>
+      <div class="tot" style="color:var(--ok)"><span>Loyalty Discount (Gold &minus;5%)</span><span class="mono">&minus;LKR 72.00</span></div>
+      <div class="tot" style="border-top:1px solid var(--ink-700);margin-top:6px;padding-top:8px">
+        <span class="disp" style="font-size:17px">Total</span>
+        <span class="disp mono" style="font-size:19px;color:var(--accent)">LKR 1,627.20</span></div>
+    </div>
+    <div class="note" style="margin:0"><svg class="ic" viewBox="0 0 24 24"><use href="#i-note"/></svg>Global note for kitchen&hellip;</div>
+    <div class="row" style="gap:10px">
+      <span class="btn" style="flex:1;text-align:center;background:var(--ink-800);border:1px solid var(--ink-700);color:#fca5a5">Clear Cart</span>
+      <span class="btn" style="flex:1.5;text-align:center;background:var(--accent);color:#1a0e03;display:flex;gap:7px;justify-content:center;align-items:center"><svg class="ic" viewBox="0 0 24 24"><use href="#i-check"/></svg>Place Order</span>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <span>3 items in cart</span><span>&bull;</span><span>Table T-05 <span style="color:var(--busy);font-weight:600">OCCUPIED</span></span>
+  <span>&bull;</span><span>Last order: #1042 <span style="color:var(--ok);font-weight:600">READY</span></span>
+  <span style="margin-left:auto;display:flex;align-items:center"><svg class="ic" viewBox="0 0 24 24" style="color:var(--ok);margin-right:6px"><use href="#i-live"/></svg>WebSocket: Live</span>
+</div>
