@@ -70,6 +70,11 @@ The two cross at aspect **0.625**. Three consequences that are easy to get wrong
   renders and text starts clipping, so that is the ceiling.
 - Once width binds, height is free up to 9.28 in. Wrapping a label onto more lines is
   then a straight win.
+- 9.28 in is the cap for the *image*, but a figure whose caption wraps to two lines needs
+  about 0.6 in more than that, and the column is only 9.72 in. At the full 9.28 in Word
+  overrides `keepNext` and drops the caption onto the next page. Anything taller than
+  about 9.0 in with a two-line caption has to lose the difference - Fig 3.4 is capped at
+  9.00 in for exactly this reason, at a cost of roughly 0.2 pt.
 
 For a sequence diagram the width is the sum of the lifeline columns, and each column is
 as wide as its widest label, so `printed_pt ≈ 95 ÷ (longest label in characters)`. Eight
