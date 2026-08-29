@@ -12,7 +12,7 @@ re-checked against the code it documents.
 | 3.3 Class Diagram | `fig3_3_class.puml` | PlantUML |
 | 3.4 Sequence | `fig3_4_sequence.puml` | PlantUML |
 | 3.5 State Machines | `fig3_5_state.puml` | PlantUML |
-| 3.6 Data Flow | `fig3_6_dfd.mmd` | mermaid-cli |
+| 3.6 Data Flow | `fig3_6_dfd.html` | headless Chrome via `shot.mjs` |
 | 3.7 Activity | `fig3_7_activity.puml` | PlantUML |
 | 3.8 POS Terminal | `mock_3_8_pos.html` + `_mockbase.css` | headless Chrome via `shot.mjs` |
 | 3.9 Kitchen Display | `mock_3_9_kds.html` + `_mockbase.css` | headless Chrome via `shot.mjs` |
@@ -24,12 +24,9 @@ re-checked against the code it documents.
 # PlantUML
 java -jar plantuml.jar -tpng fig3_2_erd.puml
 
-# mermaid - no -C stylesheet: mermaid measures label widths before an external
-# stylesheet applies, so forcing a font there makes every label clip
-mmdc -i fig3_6_dfd.mmd -o fig3_6.png -b white -s 3
-
-# HTML mockups and the architecture diagram
+# HTML mockups, the architecture diagram and the DFD
 node shot.mjs mock_3_8_pos.html fig3_8_pos.png 3
+node shot.mjs fig3_6_dfd.html fig3_6.png 3
 ```
 
 `shot.mjs` hard-codes a Chrome path — change `executablePath` for your machine. The
@@ -65,16 +62,22 @@ The two cross at aspect **0.625**. Three consequences that are easy to get wrong
   same factor and cancels. Only reducing content, or moving toward the 0.625 aspect,
   changes the printed size.
 - For a mermaid **flowchart** raising `fontSize` *does* help, because node padding and
-  subgraph containers are fixed and do not scale with it. Fig 3.6 gains 5.1 → 6.5 pt
-  going from 20px to 32px. Above ~32px mermaid's label measurement diverges from what it
-  renders and text starts clipping, so that is the ceiling.
+  subgraph containers are fixed and do not scale with it — Fig 3.6 gained 5.1 → 6.5 pt
+  going 20px to 32px while it was still mermaid, and above ~32px mermaid's label
+  measurement diverges from what it renders and text clips, so that was the ceiling.
+  No figure uses mermaid any more; this is kept because the trap is easy to re-enter.
 - Once width binds, height is free up to 9.28 in. Wrapping a label onto more lines is
   then a straight win.
 - 9.28 in is the cap for the *image*, but a figure whose caption wraps to two lines needs
   about 0.6 in more than that, and the column is only 9.72 in. At the full 9.28 in Word
   overrides `keepNext` and drops the caption onto the next page. Anything taller than
-  about 9.0 in with a two-line caption has to lose the difference - Fig 3.4 is capped at
-  9.00 in for exactly this reason, at a cost of roughly 0.2 pt.
+  about 9.0 in with a two-line caption has to lose the difference - Figs 3.4 and 3.6 are
+  both capped at 9.00 in for exactly this reason, at a cost of roughly 0.2 pt each.
+- For a hand-authored HTML/SVG figure the canvas is yours, so unlike PlantUML raising the
+  font size *does* raise the printed size. The lever is the aspect: get the layout to
+  0.625 and it fills the page in both directions. Fig 3.6 sits at 0.624, which is why
+  widening its body from 1000 to 1064 px to open a label gutter cost no printed size at
+  all - it was height-bound, so the extra width was free.
 
 For a sequence diagram the width is the sum of the lifeline columns, and each column is
 as wide as its widest label, so `printed_pt ≈ 95 ÷ (longest label in characters)`. Eight
