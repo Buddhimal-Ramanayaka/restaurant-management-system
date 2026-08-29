@@ -50,7 +50,10 @@ skinparam note {
   BorderColor #2E7D32
 }
 
-title Activity Diagram — Complete Order Fulfilment Workflow
+title
+Activity Diagram — Complete Order Fulfilment Workflow
+<size:10> </size>
+end title
 
 |#E3F2FD|Waiter (POS)|
 start

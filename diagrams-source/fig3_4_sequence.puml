@@ -56,91 +56,81 @@ participant "Inventory\nLedger"  as IL #E1BEE7
 participant "Event\nPublisher"   as EP #DCEDC8
 participant "Inventory\nAlert"   as AL #FFCCBC
 
-W  -> C  : 1. POST /orders
-C  -> OS : 2. submitOrder(...)
+W  -> C  : 1. POST /api/orders
+C  -> OS : 2. submitOrder\n(request,\nwaiterPrincipal)
 
 group Single @Transactional boundary — steps 3 to 19
-  OS -> OS : 3. open table
+  OS -> OS : 3. tableService.\nopenTableForOrder
   note over OS, RD
     SELECT … FOR UPDATE
     on the table row —
     status becomes OCCUPIED
   end note
-  OS -> OS : 4. find customer
+  OS -> OS : 4. customer\nRepository.\nfindByPhoneNumber
   note over OS, RD
-    a Walk-in customer is created
-    if the number is unknown
+    creates a Walk-in customer if unknown
   end note
-  OS -> OS : 5. read menu item
+  OS -> OS : 5. menuItem\nRepository.\nfindById per line
   note over OS, RD
     an unavailable item is rejected
-    before any stock moves
   end note
 
-  OS -> RD : 6. deductForOrder
+  OS -> RD : 6. deductForOrder(lines)
   note over OS, RD
     @Transactional(REQUIRED) —
     joins the caller's transaction
   end note
-  RD -> RD : 7. read recipes
+  RD -> RD : 7. recipe\nRepository.\nfindByMenuItemId
   note over RD, IL
-    required quantity summed
-    per ingredient across the order
+    summed per ingredient across the order
   end note
-  RD -> IR : 8. lock rows
+  RD -> IR : 8. findAllById\nForUpdate\n(sorted ids)
   note over RD, IL
-    SELECT … FOR UPDATE in
-    ascending id order — blocks
-    concurrent transactions,
+    SELECT … FOR UPDATE in ascending id order
+    — blocks concurrent transactions,
     avoids deadlock
   end note
-  IR --> RD : 9. locked rows
-  RD -> RD : 10. validate stock
+  IR --> RD : 9. locked Ingredient rows
+  RD -> RD : 10. validate stock\n≥ required qty
   note over RD, IL #FFCDD2
-    any shortfall raises
-    InsufficientStockException →
-    HTTP 409 and the whole
-    transaction rolls back
+    any shortfall raises InsufficientStockException
+    → HTTP 409 and the whole transaction
+    rolls back
   end note
-  RD -> RD : 11a. compute stock
-  RD -> IR : 11b. save
-  RD -> IL : 12. ledger write
-  IL --> RD : 13. ledger row
-  RD -> EP : 14. item disabled
+  RD -> RD : 11a. newStock =\ncurrent −\n(qty × recipeQty)
+  RD -> IR : 11b. save(ingredient)
+  RD -> IL : 12. recordRecipeDeduction
+  IL --> RD : 13. ledger row appended
+  RD -> EP : 14. publishMenuItem\nAvailabilityChanged
   note over EP, AL
-    only when the ingredient
-    reached zero
+    only when stock reached zero
   end note
-  RD -> RD : 15. reorder event
-  RD --> OS : 16. complete
-  OS -> OS : 17. save(order)
-  OS -> EP : 18. new ticket
-  OS -> EP : 19. table status
+  RD -> RD : 15. publishEvent\n(ReorderThreshold\nBreachedEvent)
+  RD --> OS : 16. deduction complete
+  OS -> OS : 17. orderRepository\n.save(order)\n— PENDING
+  OS -> EP : 18. publishNewTicket
+  OS -> EP : 19. publishTable\nStatusChanged
 end
 
 note over OS, EP #E8F5E9
-  Transaction commits on return.
-  Steps 18 and 19 are dispatched
-  inside it — the stock alert below
+  Transaction commits on return. Steps 18 and 19
+  are dispatched inside it — the stock alert below
   is deferred to AFTER_COMMIT.
 end note
 
-EP --> W : 20. STOMP broadcast
-OS --> C : 21. OrderResponse
+EP --> W : 20. STOMP → /topic/kitchen\nand /topic/tables
+OS --> C : 21. OrderResponse\n(id, status)
 C  --> W : 22. 201 Created
 
-AL -> AL : 23. event received
+AL -> AL : 23. onReorder\nThresholdBreached\n(event)
 note over EP, AL
-  @Async
-  @TransactionalEventListener
-  (AFTER_COMMIT) — own thread,
-  once the order has committed
+  @Async @TransactionalEventListener(AFTER_COMMIT)
+  — own thread, once the order has committed
 end note
-AL -> AL : 24. handle breach
+AL -> AL : 24. handleReorder\nBreach(ingredientId,\nseverity)
 note over EP, AL
-  drafts a Purchase Order
-  if none is already in flight
+  drafts a Purchase Order if none is in flight
 end note
-AL -> EP : 25. stock alert
+AL -> EP : 25. publishStockAlert
 
 @enduml

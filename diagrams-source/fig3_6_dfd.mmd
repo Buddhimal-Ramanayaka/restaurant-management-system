@@ -1,22 +1,19 @@
 %%{init: {'theme':'base','themeVariables':{'fontFamily':'Arial, Helvetica, sans-serif','fontSize':'32px','lineColor':'#546E7A','edgeLabelBackground':'#FFFFFF'},'flowchart':{'nodeSpacing':26,'rankSpacing':38,'curve':'basis','padding':8}}}%%
 flowchart TB
 
-subgraph L0["Level 0 — Context Diagram&nbsp;&nbsp;&nbsp;"]
+subgraph L0[" "]
   direction LR
-  W0([Waiter]) -->|"order items, void request"| SYS(("Restaurant<br/>Management<br/>System"))
-  K0([Kitchen Staff]) -->|"ticket status"| SYS
-  C0([Cashier]) -->|"payment, shift declaration"| SYS
-  M0([Manager]) -->|"GRN, PO approval, stock count"| SYS
-  A0([Admin]) -->|"users, menu, recipes, rates"| SYS
-  SYS -->|"KOT ticket"| K0
-  SYS -->|"bill, receipt"| C0
-  SYS -->|"KPIs, stock alerts, shift reports"| M0
-  SYS -->|"purchase order PDF"| S0([Supplier])
-  S0 -->|"delivery note"| M0
-  SYS -->|"loyalty tier, visit history"| CU0([Customer])
+  W0([Waiter]) <-->|"→ orders, voids<br/>← order-ready alert"| SYS(("Restaurant<br/>Management<br/>System"))
+  K0([Kitchen Staff]) <-->|"→ ticket status<br/>← KOT ticket"| SYS
+  C0([Cashier]) <-->|"→ payment, shift<br/>← bill, receipt"| SYS
+  M0([Manager]) <-->|"→ GRN, PO, count<br/>← KPIs, alerts"| SYS
+  A0([Admin]) -->|"→ users, menu, rates"| SYS
+  SYS -->|"→ purchase order PDF"| S0([Supplier])
+  S0 -->|"→ delivery note"| M0
+  SYS -->|"→ loyalty tier, visits"| CU0([Customer])
 end
 
-subgraph L1["Level 1 — System Decomposition&nbsp;&nbsp;&nbsp;"]
+subgraph L1[" "]
   direction TB
 
   P1["P1 &nbsp;Authenticate<br/>and Authorise"]
