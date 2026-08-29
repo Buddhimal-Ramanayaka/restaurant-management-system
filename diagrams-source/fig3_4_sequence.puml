@@ -6,13 +6,12 @@
 ' messageMargin and every font size were inert - it rendered at a fixed 16px in a
 ' 1863-unit viewBox, which is 3.6pt on the page. PlantUML honours them.
 '
-' One colour per participant, as in the original figure.
-'
-' Sizing: printed size is fontSize x 668.2 / canvas_width when the figure is placed
-' landscape, so canvas WIDTH is the only thing that matters. Width is the sum of the
-' eight columns, and each column is as wide as its widest label - so participant names
-' and message labels are kept short and the detail is carried in notes, which are
-' anchored "over" a pair of lifelines and therefore cannot widen the canvas.
+' IngredientRepository and InventoryLedgerService are folded into RecipeDeduction as
+' self-calls, named in the adjacent notes. Printed size is fontSize x 417.6 / canvas
+' width, and canvas width is the sum of the lifeline columns, so two fewer columns is
+' the single biggest gain available. Message labels are kept short for the same reason;
+' the detail lives in the notes, which are anchored "over" a pair of lifelines and
+' therefore cannot widen the canvas.
 '
 ' Verified against OrderService.submitOrder, RecipeDeductionService.deductForOrder /
 ' handlePostDeductionThresholds and InventoryAlertService.
@@ -51,86 +50,93 @@ participant "Waiter\n(POS UI)"   as W  #BBDEFB
 participant "Order\nController"  as C  #E3F2FD
 participant "Order\nService"     as OS #C8E6C9
 participant "Recipe\nDeduction"  as RD #FFE0B2
-participant "Ingredient\nRepo"   as IR #FFCDD2
-participant "Inventory\nLedger"  as IL #E1BEE7
 participant "Event\nPublisher"   as EP #DCEDC8
 participant "Inventory\nAlert"   as AL #FFCCBC
 
-W  -> C  : 1. POST /api/orders
-C  -> OS : 2. submitOrder\n(request,\nwaiterPrincipal)
+W  -> C  : 1. POST /orders
+C  -> OS : 2. submitOrder(...)
 
-group Single @Transactional boundary — steps 3 to 19
-  OS -> OS : 3. tableService.\nopenTableForOrder
+group Single @Transactional boundary — steps 3 to 18
+  OS -> OS : 3. open table
   note over OS, RD
-    SELECT … FOR UPDATE
-    on the table row —
-    status becomes OCCUPIED
+    tableService.openTableForOrder
+    SELECT … FOR UPDATE on the
+    table row, status → OCCUPIED
   end note
-  OS -> OS : 4. customer\nRepository.\nfindByPhoneNumber
+  OS -> OS : 4. find customer
   note over OS, RD
-    creates a Walk-in customer if unknown
+    customerRepository.
+    findByPhoneNumber — creates a
+    Walk-in customer if unknown
   end note
-  OS -> OS : 5. menuItem\nRepository.\nfindById per line
+  OS -> OS : 5. read menu item
   note over OS, RD
     an unavailable item is rejected
+    before any stock moves
   end note
 
-  OS -> RD : 6. deductForOrder(lines)
+  OS -> RD : 6. deductForOrder
   note over OS, RD
     @Transactional(REQUIRED) —
     joins the caller's transaction
   end note
-  RD -> RD : 7. recipe\nRepository.\nfindByMenuItemId
-  note over RD, IL
-    summed per ingredient across the order
+  RD -> RD : 7. read recipes
+  note over RD, EP
+    recipeRepository.findByMenuItemId
+    required qty summed per ingredient
   end note
-  RD -> IR : 8. findAllById\nForUpdate\n(sorted ids)
-  note over RD, IL
-    SELECT … FOR UPDATE in ascending id order
-    — blocks concurrent transactions,
-    avoids deadlock
+  RD -> RD : 8. lock rows
+  note over RD, EP
+    ingredientRepository.
+    findAllByIdForUpdate — SELECT …
+    FOR UPDATE in ascending id order,
+    blocks concurrent transactions
   end note
-  IR --> RD : 9. locked Ingredient rows
-  RD -> RD : 10. validate stock\n≥ required qty
-  note over RD, IL #FFCDD2
-    any shortfall raises InsufficientStockException
-    → HTTP 409 and the whole transaction
-    rolls back
+  RD -> RD : 9. validate stock
+  note over RD, EP #FFCDD2
+    any shortfall raises
+    InsufficientStockException → HTTP 409,
+    whole transaction rolls back
   end note
-  RD -> RD : 11a. newStock =\ncurrent −\n(qty × recipeQty)
-  RD -> IR : 11b. save(ingredient)
-  RD -> IL : 12. recordRecipeDeduction
-  IL --> RD : 13. ledger row appended
-  RD -> EP : 14. publishMenuItem\nAvailabilityChanged
-  note over EP, AL
-    only when stock reached zero
+  RD -> RD : 10. compute stock
+  RD -> RD : 11. save ingredient
+  RD -> RD : 12. ledger write
+  note over RD, EP
+    inventoryLedgerService.
+    recordRecipeDeduction — one
+    append-only row per ingredient
   end note
-  RD -> RD : 15. publishEvent\n(ReorderThreshold\nBreachedEvent)
-  RD --> OS : 16. deduction complete
-  OS -> OS : 17. orderRepository\n.save(order)\n— PENDING
-  OS -> EP : 18. publishNewTicket
-  OS -> EP : 19. publishTable\nStatusChanged
+  RD -> EP : 13. item disabled
+  note over RD, EP
+    only when the ingredient reached zero
+  end note
+  RD -> RD : 14. reorder event
+  RD --> OS : 15. complete
+  OS -> OS : 16. save(order) — PENDING
+  OS -> EP : 17. new ticket
+  OS -> EP : 18. table status
 end
 
 note over OS, EP #E8F5E9
-  Transaction commits on return. Steps 18 and 19
-  are dispatched inside it — the stock alert below
-  is deferred to AFTER_COMMIT.
+  Transaction commits on return. Steps 17
+  and 18 are dispatched inside it — the stock
+  alert below is deferred to AFTER_COMMIT.
 end note
 
-EP --> W : 20. STOMP → /topic/kitchen\nand /topic/tables
-OS --> C : 21. OrderResponse\n(id, status)
-C  --> W : 22. 201 Created
+EP --> W : 19. STOMP broadcast
+OS --> C : 20. OrderResponse
+C  --> W : 21. 201 Created
 
-AL -> AL : 23. onReorder\nThresholdBreached\n(event)
+AL -> AL : 22. event received
 note over EP, AL
-  @Async @TransactionalEventListener(AFTER_COMMIT)
-  — own thread, once the order has committed
+  @Async @TransactionalEventListener
+  (AFTER_COMMIT) — own thread, once
+  the order has committed
 end note
-AL -> AL : 24. handleReorder\nBreach(ingredientId,\nseverity)
+AL -> AL : 23. handle breach
 note over EP, AL
   drafts a Purchase Order if none is in flight
 end note
-AL -> EP : 25. publishStockAlert
+AL -> EP : 24. stock alert
 
 @enduml
