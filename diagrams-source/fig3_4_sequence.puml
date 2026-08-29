@@ -1,0 +1,146 @@
+@startuml
+' Figure 3.4 - Sequence Diagram, Order Submission and Recipe Deduction
+'
+' Rebuilt in PlantUML. The mermaid version could not be sized: mermaid 11 ignores
+' sequence options from both a %%{init}%% directive and mmdc -c, so actorMargin,
+' messageMargin and every font size were inert - it rendered at a fixed 16px in a
+' 1863-unit viewBox, which is 3.6pt on the page. PlantUML honours them.
+'
+' One colour per participant, as in the original figure.
+'
+' Sizing: printed size is fontSize x 668.2 / canvas_width when the figure is placed
+' landscape, so canvas WIDTH is the only thing that matters. Width is the sum of the
+' eight columns, and each column is as wide as its widest label - so participant names
+' and message labels are kept short and the detail is carried in notes, which are
+' anchored "over" a pair of lifelines and therefore cannot widen the canvas.
+'
+' Verified against OrderService.submitOrder, RecipeDeductionService.deductForOrder /
+' handlePostDeductionThresholds and InventoryAlertService.
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 26
+skinparam ArrowThickness 1.8
+
+skinparam sequence {
+  ArrowColor #37474F
+  ArrowFontSize 25
+  ParticipantFontSize 26
+  ParticipantFontStyle bold
+  ParticipantPadding 16
+  BoxPadding 12
+  LifeLineBorderColor #90A4AE
+  LifeLineBackgroundColor #FAFAFA
+  GroupHeaderFontSize 25
+  GroupHeaderFontStyle bold
+  GroupBackgroundColor #E8F5E9
+  GroupBorderColor #2E7D32
+}
+skinparam note {
+  FontSize 23
+  BackgroundColor #FFF8E1
+  BorderColor #F9A825
+}
+
+hide footbox
+
+title Sequence Diagram — Order Submission and Recipe Deduction Engine
+
+participant "Waiter\n(POS UI)"   as W  #BBDEFB
+participant "Order\nController"  as C  #E3F2FD
+participant "Order\nService"     as OS #C8E6C9
+participant "Recipe\nDeduction"  as RD #FFE0B2
+participant "Ingredient\nRepo"   as IR #FFCDD2
+participant "Inventory\nLedger"  as IL #E1BEE7
+participant "Event\nPublisher"   as EP #DCEDC8
+participant "Inventory\nAlert"   as AL #FFCCBC
+
+W  -> C  : 1. POST /orders
+C  -> OS : 2. submitOrder(...)
+
+group Single @Transactional boundary — steps 3 to 19
+  OS -> OS : 3. open table
+  note over OS, RD
+    SELECT … FOR UPDATE
+    on the table row —
+    status becomes OCCUPIED
+  end note
+  OS -> OS : 4. find customer
+  note over OS, RD
+    a Walk-in customer is created
+    if the number is unknown
+  end note
+  OS -> OS : 5. read menu item
+  note over OS, RD
+    an unavailable item is rejected
+    before any stock moves
+  end note
+
+  OS -> RD : 6. deductForOrder
+  note over OS, RD
+    @Transactional(REQUIRED) —
+    joins the caller's transaction
+  end note
+  RD -> RD : 7. read recipes
+  note over RD, IL
+    required quantity summed
+    per ingredient across the order
+  end note
+  RD -> IR : 8. lock rows
+  note over RD, IL
+    SELECT … FOR UPDATE in
+    ascending id order — blocks
+    concurrent transactions,
+    avoids deadlock
+  end note
+  IR --> RD : 9. locked rows
+  RD -> RD : 10. validate stock
+  note over RD, IL #FFCDD2
+    any shortfall raises
+    InsufficientStockException →
+    HTTP 409 and the whole
+    transaction rolls back
+  end note
+  RD -> RD : 11a. compute stock
+  RD -> IR : 11b. save
+  RD -> IL : 12. ledger write
+  IL --> RD : 13. ledger row
+  RD -> EP : 14. item disabled
+  note over EP, AL
+    only when the ingredient
+    reached zero
+  end note
+  RD -> RD : 15. reorder event
+  RD --> OS : 16. complete
+  OS -> OS : 17. save(order)
+  OS -> EP : 18. new ticket
+  OS -> EP : 19. table status
+end
+
+note over OS, EP #E8F5E9
+  Transaction commits on return.
+  Steps 18 and 19 are dispatched
+  inside it — the stock alert below
+  is deferred to AFTER_COMMIT.
+end note
+
+EP --> W : 20. STOMP broadcast
+OS --> C : 21. OrderResponse
+C  --> W : 22. 201 Created
+
+AL -> AL : 23. event received
+note over EP, AL
+  @Async
+  @TransactionalEventListener
+  (AFTER_COMMIT) — own thread,
+  once the order has committed
+end note
+AL -> AL : 24. handle breach
+note over EP, AL
+  drafts a Purchase Order
+  if none is already in flight
+end note
+AL -> EP : 25. stock alert
+
+@enduml
