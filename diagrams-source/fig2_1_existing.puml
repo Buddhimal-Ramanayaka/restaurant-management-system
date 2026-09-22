@@ -1,0 +1,117 @@
+@startuml
+' Figure 2.2 - Flow Chart, Existing Manual Workflow
+'
+' The process the proposed system replaces: order taken on a paper pad, a handwritten
+' KOT carried to the kitchen, bills computed by hand, stock reconciled only at the end
+' of the day. Same swimlanes and plain notation as Figure 3.7 so the two can be read
+' against each other - the contrast between them is the argument for the system.
+'
+' The measured weaknesses from Section 1.2 are folded into the node labels rather than
+' hung off the side as notes. A first draft used eight "note right" blocks; each one
+' widens its lane, which took the canvas to 2484x2159 - aspect 1.15, printing the
+' labels at 3.5pt. Width is the binding constraint on a four-lane diagram, so anything
+' that widens a lane has to earn it.
+'
+' Figures carried across from Section 1.2 unchanged: 2-5 minutes per ticket,
+' 5-15 percent monthly stock divergence, 2-3 percent arithmetic error rate per shift.
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 21
+skinparam ArrowThickness 1.5
+skinparam ArrowColor #000000
+
+skinparam activity {
+  FontSize 21
+  BorderThickness 1.6
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #000000
+  DiamondFontSize 20
+  StartColor #000000
+  EndColor #000000
+}
+skinparam swimlane {
+  BorderColor #000000
+  BorderThickness 1.6
+  TitleFontSize 23
+  TitleFontStyle bold
+}
+skinparam note {
+  FontSize 19
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  BorderThickness 1.2
+}
+
+title
+Flow Chart — Existing Manual Workflow
+<size:10> </size>
+end title
+
+|Waiter|
+start
+:Seat customer, take order
+on a paper pad;
+:Handwrite kitchen order ticket,
+keep the carbon copy;
+:Carry ticket to the pass —
+2 to 5 minutes per ticket;
+
+|Kitchen|
+:Spike ticket on the rail,
+prepare in rail order;
+if (Ingredient in stock?) then (no)
+  :Tell the waiter, strike
+  the dish off — nothing
+  is recorded;
+else (yes)
+endif
+:Call out when plated —
+no reliable signal
+reaches the waiter;
+
+|Waiter|
+:Notice the call,
+collect and serve;
+
+|Cashier|
+:Find the carbon copy, add
+line totals on a calculator;
+:Work out service charge
+and VAT by hand — 2 to 3
+percent of bills are wrong;
+if (Discount requested?) then (yes)
+  :Apply at the cashier's
+  discretion — no record of
+  who authorised it;
+else (no)
+endif
+:Take payment, write the receipt;
+if (Void or refund?) then (yes)
+  :Write a paper note —
+  the only trace, easily
+  lost or altered;
+else (no)
+endif
+
+|Manager (end of day)|
+:Gather tickets and receipts,
+tally sales by hand;
+:Count physical stock on the shelf;
+if (Matches expected?) then (no)
+  :Record the shortfall —
+  stock diverges 5 to 15
+  percent each month,
+  loss unattributable;
+else (yes)
+endif
+:Judge reorder quantities
+from memory — no trigger,
+no view of profitability
+or demand;
+stop
+
+@enduml
