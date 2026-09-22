@@ -19,7 +19,7 @@ skinparam shadowing false
 skinparam defaultFontName "Arial"
 skinparam defaultFontSize 22
 skinparam ArrowThickness 1.5
-skinparam ArrowColor #37474F
+skinparam ArrowColor #000000
 skinparam nodesep 18
 skinparam ranksep 26
 
@@ -30,21 +30,21 @@ skinparam state {
   AttributeFontStyle plain
   BorderThickness 1.8
   BackgroundColor #FFFFFF
-  BorderColor #607D8B
-  StartColor #212121
-  EndColor #212121
+  BorderColor #000000
+  StartColor #000000
+  EndColor #000000
 }
-skinparam StateFontColor #111111
+skinparam StateFontColor #000000
 
 title State Machine Diagrams — Order Status and Table Status
 
 state "Order Status State Machine" as OSM {
-  state "PENDING"   as OP #FFF8E1 ##[bold]E65100
-  state "PREPARING" as OR #E3F2FD ##[bold]1976D2
-  state "READY"     as OY #E8F5E9 ##[bold]2E7D32
-  state "BILLED"    as OB #E3F2FD ##[bold]1976D2
-  state "COMPLETED" as OC #B2DFDB ##[bold]00695C
-  state "VOID"      as OV #FFCDD2 ##[bold]C62828
+  state "PENDING"   as OP #FFFFFF ##[bold]E65100
+  state "PREPARING" as OR #FFFFFF ##[bold]1976D2
+  state "READY"     as OY #FFFFFF ##[bold]2E7D32
+  state "BILLED"    as OB #FFFFFF ##[bold]1976D2
+  state "COMPLETED" as OC #FFFFFF ##[bold]00695C
+  state "VOID"      as OV #FFFFFF ##[bold]C62828
 
   OP : order submitted,\nKOT broadcast
   OR : cook started,\npreparingStartedAt set
@@ -65,11 +65,11 @@ state "Order Status State Machine" as OSM {
 }
 
 state "Table Status State Machine" as TSM {
-  state "AVAILABLE" as TA #C8E6C9 ##[bold]2E7D32
-  state "OCCUPIED"  as TO #FFCDD2 ##[bold]C62828
-  state "BILLED"    as TB #BBDEFB ##[bold]1976D2
-  state "CLEANING"  as TC #FFF9C4 ##[bold]F9A825
-  state "RESERVED"  as TR #E1BEE7 ##[bold]7B1FA2
+  state "AVAILABLE" as TA #FFFFFF ##[bold]2E7D32
+  state "OCCUPIED"  as TO #FFFFFF ##[bold]C62828
+  state "BILLED"    as TB #FFFFFF ##[bold]1976D2
+  state "CLEANING"  as TC #FFFFFF ##[bold]F9A825
+  state "RESERVED"  as TR #FFFFFF ##[bold]7B1FA2
 
   TA : floor plan GREEN\nonly state an order\nmay open from
   TO : floor plan RED\norder in progress

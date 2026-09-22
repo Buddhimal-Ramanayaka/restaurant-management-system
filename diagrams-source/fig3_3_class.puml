@@ -25,45 +25,45 @@ hide circle
 
 skinparam class {
   BorderThickness 1.6
-  AttributeFontColor #111111
+  AttributeFontColor #000000
   FontColor #FFFFFF
   StereotypeFontColor #FFFFFF
   StereotypeFontSize 20
 }
 skinparam class<<Entity>> {
-  BackgroundColor #E3F2FD
-  HeaderBackgroundColor #1976D2
-  BorderColor #1976D2
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<Menu>> {
-  BackgroundColor #E8F5E9
-  HeaderBackgroundColor #2E7D32
-  BorderColor #2E7D32
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<Stock>> {
-  BackgroundColor #FFF3E0
-  HeaderBackgroundColor #EF6C00
-  BorderColor #EF6C00
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<Order>> {
-  BackgroundColor #FFEBEE
-  HeaderBackgroundColor #C62828
-  BorderColor #C62828
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<Join>> {
-  BackgroundColor #F3E5F5
-  HeaderBackgroundColor #6A1B9A
-  BorderColor #6A1B9A
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<Service>> {
-  BackgroundColor #E0F2F1
-  HeaderBackgroundColor #00695C
-  BorderColor #00695C
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<Enum>> {
-  BackgroundColor #FCE4EC
-  HeaderBackgroundColor #AD1457
-  BorderColor #AD1457
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 
 title Class Diagram — Core Domain and Service Layer

@@ -23,35 +23,35 @@ skinparam defaultFontSize 26
 skinparam ArrowThickness 1.8
 
 skinparam sequence {
-  ArrowColor #37474F
+  ArrowColor #000000
   ArrowFontSize 25
   ParticipantFontSize 26
   ParticipantFontStyle bold
   ParticipantPadding 16
   BoxPadding 12
-  LifeLineBorderColor #90A4AE
-  LifeLineBackgroundColor #FAFAFA
+  LifeLineBorderColor #000000
+  LifeLineBackgroundColor #FFFFFF
   GroupHeaderFontSize 25
   GroupHeaderFontStyle bold
-  GroupBackgroundColor #E8F5E9
-  GroupBorderColor #2E7D32
+  GroupBackgroundColor #FFFFFF
+  GroupBorderColor #000000
 }
 skinparam note {
   FontSize 23
-  BackgroundColor #FFF8E1
-  BorderColor #F9A825
+  BackgroundColor #FFFFFF
+  BorderColor #000000
 }
 
 hide footbox
 
 title Sequence Diagram — Order Submission and Recipe Deduction Engine
 
-participant "Waiter\n(POS UI)"   as W  #BBDEFB
-participant "Order\nController"  as C  #E3F2FD
-participant "Order\nService"     as OS #C8E6C9
-participant "Recipe\nDeduction"  as RD #FFE0B2
-participant "Event\nPublisher"   as EP #DCEDC8
-participant "Inventory\nAlert"   as AL #FFCCBC
+participant "Waiter\n(POS UI)"   as W  #FFFFFF
+participant "Order\nController"  as C  #FFFFFF
+participant "Order\nService"     as OS #FFFFFF
+participant "Recipe\nDeduction"  as RD #FFFFFF
+participant "Event\nPublisher"   as EP #FFFFFF
+participant "Inventory\nAlert"   as AL #FFFFFF
 
 W  -> C  : 1. POST /orders
 C  -> OS : 2. submitOrder(...)
@@ -93,7 +93,7 @@ group Single @Transactional boundary — steps 3 to 18
     blocks concurrent transactions
   end note
   RD -> RD : 9. validate stock
-  note over RD, EP #FFCDD2
+  note over RD, EP #FFFFFF
     any shortfall raises
     InsufficientStockException → HTTP 409,
     whole transaction rolls back
@@ -117,7 +117,7 @@ group Single @Transactional boundary — steps 3 to 18
   OS -> EP : 18. table status
 end
 
-note over OS, EP #E8F5E9
+note over OS, EP #FFFFFF
   Transaction commits on return. Steps 17
   and 18 are dispatched inside it — the stock
   alert below is deferred to AFTER_COMMIT.

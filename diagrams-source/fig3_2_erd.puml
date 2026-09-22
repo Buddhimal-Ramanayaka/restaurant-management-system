@@ -22,58 +22,58 @@ hide stereotype
 
 skinparam class {
   BorderThickness 1.6
-  AttributeFontColor #111111
+  AttributeFontColor #000000
   FontColor #FFFFFF
 }
 skinparam class<<usr>> {
-  BackgroundColor #E8EAF6
-  HeaderBackgroundColor #283593
-  BorderColor #283593
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<menu>> {
-  BackgroundColor #E8F5E9
-  HeaderBackgroundColor #2E7D32
-  BorderColor #2E7D32
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<ingr>> {
-  BackgroundColor #FFFDE7
-  HeaderBackgroundColor #F9A825
-  BorderColor #F9A825
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<tbl>> {
-  BackgroundColor #E3F2FD
-  HeaderBackgroundColor #1976D2
-  BorderColor #1976D2
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<supp>> {
-  BackgroundColor #EDE7F6
-  HeaderBackgroundColor #4527A0
-  BorderColor #4527A0
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<join>> {
-  BackgroundColor #F3E5F5
-  HeaderBackgroundColor #6A1B9A
-  BorderColor #6A1B9A
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<ord>> {
-  BackgroundColor #FFEBEE
-  HeaderBackgroundColor #C62828
-  BorderColor #C62828
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<det>> {
-  BackgroundColor #FFF3E0
-  HeaderBackgroundColor #EF6C00
-  BorderColor #EF6C00
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<proc>> {
-  BackgroundColor #E0F2F1
-  HeaderBackgroundColor #00695C
-  BorderColor #00695C
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 skinparam class<<cfg>> {
-  BackgroundColor #ECEFF1
-  HeaderBackgroundColor #546E7A
-  BorderColor #546E7A
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #000000
+  BorderColor #000000
 }
 
 title Enhanced Entity Relationship Diagram — RMS Database

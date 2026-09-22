@@ -25,29 +25,29 @@ skinparam shadowing false
 skinparam defaultFontName "Arial"
 skinparam defaultFontSize 21
 skinparam ArrowThickness 1.5
-skinparam ArrowColor #37474F
+skinparam ArrowColor #000000
 
 skinparam activity {
   FontSize 21
   BorderThickness 1.6
   BackgroundColor #FFFFFF
-  BorderColor #546E7A
-  DiamondBackgroundColor #FFF8E1
-  DiamondBorderColor #F9A825
+  BorderColor #000000
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #000000
   DiamondFontSize 20
-  StartColor #212121
-  EndColor #212121
+  StartColor #000000
+  EndColor #000000
 }
 skinparam swimlane {
-  BorderColor #90A4AE
+  BorderColor #000000
   BorderThickness 1.6
   TitleFontSize 23
   TitleFontStyle bold
 }
 skinparam note {
   FontSize 19
-  BackgroundColor #E8F5E9
-  BorderColor #2E7D32
+  BackgroundColor #FFFFFF
+  BorderColor #000000
 }
 
 title
@@ -55,7 +55,7 @@ Activity Diagram — Complete Order Fulfilment Workflow
 <size:10> </size>
 end title
 
-|#E3F2FD|Waiter (POS)|
+|#FFFFFF|Waiter (POS)|
 start
 :Log in, select a table
 <i>client-side only,</i>
@@ -64,17 +64,17 @@ start
 customer lookup,
 submit order;
 
-|#E8F5E9|System (Backend)|
+|#FFFFFF|System (Backend)|
 :Lock table row
 SELECT … FOR UPDATE;
 if (Table AVAILABLE?) then (no)
-  :409 — table busy; <<#FFCDD2>>
+  :409 — table busy; <<#FFFFFF>>
   stop
 else (yes)
 endif
 :Set OCCUPIED, resolve customer;
 if (All items available?) then (no)
-  :409 — item off menu; <<#FFCDD2>>
+  :409 — item off menu; <<#FFFFFF>>
   stop
 else (yes)
 endif
@@ -83,7 +83,7 @@ sum per ingredient,
 lock rows asc. id;
 if (Stock sufficient?) then (no)
   :409 — short stock,
-  order rolls back; <<#FFCDD2>>
+  order rolls back; <<#FFFFFF>>
   stop
 else (yes)
 endif
@@ -94,16 +94,16 @@ persist PENDING, broadcast KOT;
 :Commit. Async after:
 draft PO, alert mgr;
 
-|#FFF8E1|Kitchen Staff|
+|#FFFFFF|Kitchen Staff|
 :Receive KOT,
 tap Start → PREPARING,
 mark lines ready,
 order READY;
 
-|#E3F2FD|Waiter (POS)|
+|#FFFFFF|Waiter (POS)|
 :Order-ready alert;
 
-|#FCE4EC|Cashier|
+|#FFFFFF|Cashier|
 :Open shift, issue bill
 VAT + service charge;
 if (Manual discount?) then (yes)
