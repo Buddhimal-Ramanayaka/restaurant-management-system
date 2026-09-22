@@ -50,3 +50,32 @@ page. Figures 3.4 and 3.6 are both capped at 9.00 in for this reason.
 explicit `w:sz` renders at Word's 10 pt fallback rather than the 12 pt body size. This is
 invisible in the XML and easy to introduce when adding a sentence. `finalfix.py` caught 18
 such paragraphs; the check is worth re-running after any edit that adds text.
+
+## The post-evaluation pass
+
+The report came back from evaluation with twelve defects. These scripts are the second
+pass, run in this order after the nine above:
+
+| # | Script | What it does |
+|---|---|---|
+| 10 | `coverpages.py` | Renders the cover and title pages to the university template. Uses exact-height spacer paragraphs, because Word discards `w:spacing w:before` at the top of a page and the title collapsed to y=72. |
+| 11 | `toclinks.py` | Wraps every dot-leader entry in `<w:hyperlink w:anchor>` and drops a matching `<w:bookmarkStart>` at each target. No `rStyle`, so nothing about the appearance changes. |
+| 12 | `addsections.py` | Adds 1.5 Development Methodology and 4.5 Coding Practices — examiner items 5 and 10. |
+| 13 | `swap_plain.py` | Swaps in the eight figures restyled to plain UML — item 6. Maps by caption text, not by media filename: the author's own edits renumbered `word/media`. |
+| 14 | `insert_existing.py` | Inserts 2.1.1 and the flow chart of the manual workflow — item 4. |
+| 15 | `compare.py` | Adds the two vendor screenshots, 2.1.5 and the capability comparison in Table 2.1, and corrects 2.1.4 — item 3. |
+| 16 | `screens.py` | Replaces the Section 3.9 mock-ups with screenshots of the running system and adds 3.9.4 — item 9. |
+| 17 | `reorg.py` | Moves Appendix C into Chapter 5 as 5.7 and the use case diagram into 2.2 — items 11 and 8. |
+| 18 | `verify.py` | Checks every front-matter page number against the PDF independently of `pages.py`, plus anchors, caption pairing and duplicate figure numbers. |
+
+`pages.py` has one trap worth naming. It split the document on `(?=<w:p )`, with a
+trailing space, but every paragraph these scripts generate is written as bare `<w:p>`.
+Those were absorbed into the preceding chunk, so one chunk held several entries and the
+writer put the first entry's page number into the last entry's slot. The split is now
+`(?=<w:p[ >/])`. Any new script that emits paragraphs should still be checked with
+`verify.py`, which flags a multi-entry chunk directly.
+
+Screenshots come from `diagrams-source/shots_app.mjs` (the running system, driven through
+headless Chrome at 1024 px so printed text lands near 6 pt) and
+`diagrams-source/shots_competitors.mjs` (the vendors' own published product images). Both
+are captured before, not during, the docx run.
