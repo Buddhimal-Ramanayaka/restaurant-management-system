@@ -66,7 +66,8 @@ pass, run in this order after the nine above:
 | 15 | `compare.py` | Adds the two vendor screenshots, 2.1.5 and the capability comparison in Table 2.1, and corrects 2.1.4 — item 3. |
 | 16 | `screens.py` | Replaces the Section 3.9 mock-ups with screenshots of the running system and adds 3.9.4 — item 9. |
 | 17 | `reorg.py` | Moves Appendix C into Chapter 5 as 5.7 and the use case diagram into 2.2 — items 11 and 8. |
-| 18 | `verify.py` | Checks every front-matter page number against the PDF independently of `pages.py`, plus anchors, caption pairing and duplicate figure numbers. |
+| 18 | `resize.py` | Restores the two figure heights the author set by hand and `swap_plain.py` overwrote. Height only: 5.56 / 8.67 is exactly the class diagram's aspect, so the resize was a corner drag, and forcing the recorded widths onto the replacement artwork would stretch it. |
+| 19 | `verify.py` | Checks every front-matter page number against the PDF independently of `pages.py`, plus anchors, caption pairing and duplicate figure numbers. |
 
 `pages.py` has one trap worth naming. It split the document on `(?=<w:p )`, with a
 trailing space, but every paragraph these scripts generate is written as bare `<w:p>`.
